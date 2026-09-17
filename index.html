@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>دليل عمليات الشراء والاستيراد — عرض للإدارة</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@200..700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#eef1f5;
+    --surface:#ffffff;
+    --surface-2:#f5f8fb;
+    --ink:#12283d;
+    --ink-soft:#5a6b7b;
+    --line:#dce3ea;
+    --line-soft:#e9eef3;
+    --navy:#0f3049;
+    --navy-2:#1b4a6b;
+    --navy-ink:#eaf1f7;
+    --brass:#b0842e;
+    --brass-2:#916b1f;
+    --brass-bg:#f5ecd6;
+    --green:#1c855a;
+    --green-bg:#e3f3ec;
+    --amber:#bf871c;
+    --amber-bg:#f8eecf;
+    --red:#c0392b;
+    --red-bg:#fbe8e5;
+    --shadow:0 1px 2px rgba(16,48,73,.06),0 10px 30px rgba(16,48,73,.07);
+  }
+  :root:not([data-theme="light"]){
+    @media (prefers-color-scheme:dark){
+      --bg:#0a0f15;--surface:#141c26;--surface-2:#1b2530;--ink:#e7edf3;--ink-soft:#9fb1c1;
+      --line:#2a3744;--line-soft:#232f3b;--navy:#0b2233;--navy-2:#1c4d70;--navy-ink:#eaf1f7;
+      --brass:#d6a54c;--brass-2:#e0b565;--brass-bg:#372c15;--green:#3fb684;--green-bg:#163024;
+      --amber:#dfa93f;--amber-bg:#32290f;--red:#ff7a6d;--red-bg:#331c1a;
+      --shadow:0 1px 2px rgba(0,0,0,.4),0 12px 34px rgba(0,0,0,.4);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0a0f15;--surface:#141c26;--surface-2:#1b2530;--ink:#e7edf3;--ink-soft:#9fb1c1;
+    --line:#2a3744;--line-soft:#232f3b;--navy:#0b2233;--navy-2:#1c4d70;--navy-ink:#eaf1f7;
+    --brass:#d6a54c;--brass-2:#e0b565;--brass-bg:#372c15;--green:#3fb684;--green-bg:#163024;
+    --amber:#dfa93f;--amber-bg:#32290f;--red:#ff7a6d;--red-bg:#331c1a;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 12px 34px rgba(0,0,0,.4);
+  }
+
+  *{box-sizing:border-box;}
+  html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;}
+  body{
+    margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Readex Pro","IBM Plex Sans",system-ui,sans-serif;
+    line-height:1.75;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+  }
+  .en{font-family:"IBM Plex Sans","Readex Pro",sans-serif;direction:ltr;unicode-bidi:isolate;font-feature-settings:"tnum" 1;}
+  .wrap{max-width:1000px;margin:0 auto;padding:0 18px;}
+
+  /* ===== hero ===== */
+  header.hero{
+    background:
+      radial-gradient(1100px 380px at 88% -20%, rgba(176,132,46,.16), transparent 60%),
+      linear-gradient(158deg,var(--navy),var(--navy-2));
+    color:var(--navy-ink);padding:48px 0 0;position:relative;
+  }
+  header.hero::after{content:"";position:absolute;inset-inline:0;bottom:0;height:1px;
+    background:linear-gradient(90deg,transparent,rgba(176,132,46,.55),transparent);}
+  .hero .kicker{
+    font-size:.84rem;color:var(--brass);font-weight:600;margin:0 0 12px;
+  }
+  .hero h1{margin:0;font-size:2.35rem;font-weight:700;line-height:1.24;}
+  .hero p.lead{margin:15px 0 0;font-size:1.06rem;color:#c6d4e2;max-width:62ch;line-height:1.8;}
+
+  /* ===== stepper / tabs ===== */
+  nav.steps{
+    display:flex;gap:8px;margin-top:30px;padding-bottom:2px;overflow-x:auto;
+    scrollbar-width:none;
+  }
+  nav.steps::-webkit-scrollbar{display:none;}
+  .step{
+    flex:1 1 0;min-width:150px;cursor:pointer;border:none;text-align:start;
+    background:rgba(255,255,255,.06);color:#bcd7ea;
+    border-top:3px solid transparent;border-radius:10px 10px 0 0;
+    padding:13px 15px 15px;transition:background .18s,color .18s,border-color .18s;
+    font-family:inherit;
+  }
+  .step:hover{background:rgba(255,255,255,.12);color:#eaf3fa;}
+  .step .num{font-family:"IBM Plex Sans";font-size:.72rem;font-weight:600;opacity:.8;display:block;margin-bottom:3px;}
+  .step .lbl{font-size:.98rem;font-weight:600;line-height:1.3;}
+  .step[aria-selected="true"]{
+    background:var(--surface);color:var(--ink);border-top-color:var(--brass);
+  }
+  .step:focus-visible{outline:2px solid var(--brass);outline-offset:2px;}
+
+  /* ===== panels ===== */
+  main{padding:0 0 70px;}
+  .panel{display:none;padding-top:34px;}
+  .panel.active{display:block;animation:rise .28s ease both;}
+  @media (prefers-reduced-motion:reduce){.panel.active{animation:none;}}
+  @keyframes rise{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+
+  .panel-head{margin-bottom:20px;}
+  .panel-head h2{margin:0 0 7px;font-size:1.55rem;font-weight:700;}
+  .panel-head p{margin:0;color:var(--ink-soft);max-width:70ch;}
+
+  .card{
+    background:var(--surface);border:1px solid var(--line);border-radius:16px;
+    box-shadow:var(--shadow);padding:24px;margin-bottom:18px;
+  }
+  .card h3{margin:0 0 4px;font-size:1.14rem;font-weight:700;letter-spacing:-.005em;}
+  .card .sub{margin:0 0 16px;color:var(--ink-soft);font-size:.92rem;}
+
+  /* ===== stage 1: PO strength ===== */
+  .checkgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  @media (max-width:640px){.checkgrid{grid-template-columns:1fr;}}
+  .check{
+    display:flex;align-items:flex-start;gap:11px;cursor:pointer;
+    background:var(--surface-2);border:1px solid var(--line-soft);border-radius:10px;
+    padding:12px 13px;transition:border-color .15s,background .15s;
+    font-size:.92rem;user-select:none;
+  }
+  .check:hover{border-color:var(--brass);}
+  .check .tick{
+    flex:none;width:22px;height:22px;border-radius:6px;border:2px solid var(--line);
+    background:var(--surface);display:grid;place-items:center;margin-top:1px;
+    transition:background .15s,border-color .15s;
+  }
+  .check .tick svg{width:13px;height:13px;stroke:#fff;stroke-width:3;fill:none;opacity:0;transition:opacity .15s;}
+  .check[aria-checked="true"]{background:var(--green-bg);border-color:var(--green);}
+  .check[aria-checked="true"] .tick{background:var(--green);border-color:var(--green);}
+  .check[aria-checked="true"] .tick svg{opacity:1;}
+  .check:focus-visible{outline:2px solid var(--brass);outline-offset:2px;}
+
+  .meter-wrap{
+    position:sticky;bottom:0;margin-top:20px;
+    background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px;
+    box-shadow:0 -4px 20px rgba(16,48,73,.06);
+  }
+  .meter-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;}
+  .meter-top .verdict{font-weight:700;font-size:1.05rem;}
+  .meter-top .count{font-size:.85rem;color:var(--ink-soft);font-family:"IBM Plex Sans";}
+  .bar{height:12px;border-radius:20px;background:var(--line-soft);overflow:hidden;}
+  .bar span{display:block;height:100%;width:0;border-radius:20px;transition:width .4s ease,background .4s ease;}
+
+  /* ===== payment ===== */
+  .pay-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;}
+  .pay-chip{
+    cursor:pointer;border:1px solid var(--line);background:var(--surface);color:var(--ink);
+    border-radius:22px;padding:9px 16px;font-family:inherit;font-size:.9rem;font-weight:600;
+    transition:all .15s;display:flex;align-items:center;gap:8px;
+  }
+  .pay-chip .dot{width:9px;height:9px;border-radius:50%;flex:none;}
+  .pay-chip:hover{border-color:var(--brass);}
+  .pay-chip[aria-selected="true"]{background:var(--navy);color:#fff;border-color:var(--navy);}
+  .pay-chip:focus-visible{outline:2px solid var(--brass);outline-offset:2px;}
+
+  .pay-detail{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--surface);}
+  .pay-detail .dhead{padding:18px 20px;border-bottom:1px solid var(--line-soft);}
+  .pay-detail .dhead h3{margin:0 0 3px;font-size:1.2rem;}
+  .pay-detail .dhead .tag{font-size:.85rem;color:var(--ink-soft);font-family:"IBM Plex Sans";}
+  .pay-body{padding:20px;}
+  .gauges{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:20px;}
+  @media (max-width:560px){.gauges{grid-template-columns:1fr;}}
+  .gauge{background:var(--surface-2);border-radius:10px;padding:12px 13px;}
+  .gauge .g-lbl{font-size:.78rem;color:var(--ink-soft);margin-bottom:7px;}
+  .gauge .g-bar{height:8px;border-radius:20px;background:var(--line-soft);overflow:hidden;}
+  .gauge .g-bar span{display:block;height:100%;border-radius:20px;}
+  .gauge .g-val{font-size:.82rem;font-weight:600;margin-top:6px;}
+  .lvl-low{color:var(--green);} .lvl-mid{color:var(--amber);} .lvl-high{color:var(--red);}
+  .fill-low{background:var(--green);} .fill-mid{background:var(--amber);} .fill-high{background:var(--red);}
+
+  .pros-cons{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  @media (max-width:560px){.pros-cons{grid-template-columns:1fr;}}
+  .pc h4{margin:0 0 9px;font-size:.95rem;display:flex;align-items:center;gap:7px;}
+  .pc ul{margin:0;padding:0;list-style:none;}
+  .pc li{position:relative;padding-inline-start:22px;margin:7px 0;font-size:.9rem;}
+  .pc.pros li::before{content:"";position:absolute;inset-inline-start:0;top:.55em;width:9px;height:9px;border-radius:50%;background:var(--green);}
+  .pc.cons li::before{content:"";position:absolute;inset-inline-start:0;top:.55em;width:9px;height:9px;border-radius:50%;background:var(--red);}
+  .when{margin-top:18px;padding:13px 15px;background:var(--brass-bg);border-radius:10px;font-size:.9rem;}
+  .when b{color:var(--brass-2);}
+
+  .spectrum{margin-top:20px;}
+  .spectrum h4{margin:0 0 12px;font-size:.95rem;color:var(--ink-soft);}
+  .spec-bar{
+    height:auto;display:flex;border-radius:10px;overflow:hidden;border:1px solid var(--line);
+    font-size:.72rem;font-family:"IBM Plex Sans";
+  }
+  .spec-seg{flex:1;padding:9px 6px;text-align:center;color:#fff;font-weight:600;line-height:1.3;}
+  .spec-labels{display:flex;justify-content:space-between;margin-top:6px;font-size:.75rem;color:var(--ink-soft);}
+
+  /* ===== incoterms ===== */
+  .term-chips{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:20px;}
+  .term-chip{
+    cursor:pointer;border:1px solid var(--line);background:var(--surface);color:var(--ink);
+    border-radius:9px;padding:8px 14px;font-family:"IBM Plex Sans";font-weight:600;font-size:.9rem;
+    transition:all .15s;
+  }
+  .term-chip:hover{border-color:var(--brass);}
+  .term-chip[aria-selected="true"]{background:var(--brass);color:#fff;border-color:var(--brass);}
+  .term-chip:focus-visible{outline:2px solid var(--navy);outline-offset:2px;}
+
+  .journey{margin:8px 0 4px;}
+  .legs{display:flex;gap:6px;position:relative;}
+  .leg{
+    flex:1;text-align:center;background:var(--surface-2);border:1px solid var(--line-soft);
+    border-radius:10px;padding:14px 6px 12px;transition:background .3s,border-color .3s;position:relative;
+  }
+  .leg .ico{font-size:1.4rem;line-height:1;margin-bottom:6px;filter:grayscale(.2);}
+  .leg .lname{font-size:.74rem;line-height:1.35;color:var(--ink-soft);}
+  .leg.seller{background:var(--navy);border-color:var(--navy);}
+  .leg.seller .lname{color:#cfe0ee;}
+  .leg.seller .ico{filter:none;}
+  .leg.risk-here::after{
+    content:"⚑ من هنا الخطر عليك";position:absolute;top:-30px;inset-inline-start:50%;
+    transform:translateX(50%);white-space:nowrap;background:var(--red);color:#fff;
+    font-size:.68rem;font-weight:600;padding:3px 8px;border-radius:6px;font-family:"Readex Pro";
+  }
+  @media (max-width:640px){
+    .legs{flex-direction:column;}
+    .leg{display:flex;align-items:center;gap:12px;text-align:start;padding:11px 14px;}
+    .leg .ico{margin:0;}
+    .leg.risk-here::after{position:static;transform:none;display:inline-block;margin-inline-start:auto;}
+  }
+  .legend-row{display:flex;gap:18px;flex-wrap:wrap;margin-top:14px;font-size:.82rem;color:var(--ink-soft);}
+  .legend-row .k{display:flex;align-items:center;gap:7px;}
+  .legend-row .box{width:15px;height:15px;border-radius:4px;flex:none;}
+
+  .term-info{margin-top:20px;display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  @media (max-width:560px){.term-info{grid-template-columns:1fr;}}
+  .term-info .ti{background:var(--surface-2);border-radius:11px;padding:15px;}
+  .term-info .ti h4{margin:0 0 8px;font-size:.92rem;}
+  .term-info .ti p{margin:0;font-size:.9rem;}
+  .ins-badge{display:inline-block;margin-top:10px;background:var(--green-bg);color:var(--green);
+    font-size:.8rem;font-weight:600;padding:4px 11px;border-radius:20px;}
+
+  /* ===== negotiation ===== */
+  .acc{border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-bottom:11px;background:var(--surface);}
+  .acc-head{
+    width:100%;text-align:start;border:none;background:transparent;cursor:pointer;
+    padding:16px 18px;font-family:inherit;font-size:1rem;font-weight:600;color:var(--ink);
+    display:flex;align-items:center;gap:13px;
+  }
+  .acc-head:hover{background:var(--surface-2);}
+  .acc-head:focus-visible{outline:2px solid var(--brass);outline-offset:-2px;}
+  .acc-head .idx{
+    flex:none;width:30px;height:30px;border-radius:8px;background:var(--brass-bg);color:var(--brass-2);
+    display:grid;place-items:center;font-family:"IBM Plex Sans";font-weight:700;font-size:.9rem;
+  }
+  .acc-head .chev{margin-inline-start:auto;transition:transform .2s;color:var(--ink-soft);}
+  .acc[aria-expanded="true"] .chev{transform:rotate(180deg);}
+  .acc-body{max-height:0;overflow:hidden;transition:max-height .28s ease;}
+  .acc-body .inner{padding:0 18px 17px 61px;font-size:.93rem;color:var(--ink-soft);}
+  @media (max-width:560px){.acc-body .inner{padding-inline:18px;}}
+  @media (prefers-reduced-motion:reduce){.acc-body{transition:none;}}
+
+  .iraq-note{
+    margin-top:8px;background:var(--navy);color:var(--navy-ink);border-radius:14px;padding:22px;
+  }
+  .iraq-note h3{margin:0 0 12px;font-size:1.1rem;color:#fff;display:flex;align-items:center;gap:9px;}
+  .iraq-note ul{margin:0;padding-inline-start:20px;}
+  .iraq-note li{margin:8px 0;font-size:.92rem;color:#d3e0ec;}
+
+  /* payment stage 2 — real channels */
+  .fx-highlight{border-inline-start:4px solid var(--brass);background:var(--brass-bg);}
+  .fx-highlight .big{font-size:1.7rem;font-weight:700;color:var(--brass-2);line-height:1;}
+  .helper .q{margin-bottom:16px;}
+  .helper .q > p{margin:0 0 9px;font-weight:600;font-size:.95rem;}
+  .opts{display:flex;gap:8px;flex-wrap:wrap;}
+  .opt-btn{cursor:pointer;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);
+    border-radius:9px;padding:9px 20px;font-family:inherit;font-weight:600;font-size:.9rem;transition:all .15s;}
+  .opt-btn:hover{border-color:var(--brass);}
+  .opt-btn[aria-pressed="true"]{background:var(--navy);color:#fff;border-color:var(--navy);}
+  .opt-btn:focus-visible{outline:2px solid var(--brass);outline-offset:2px;}
+  .result{margin-top:14px;padding:16px 18px;border-radius:11px;background:var(--green-bg);
+    border:1px solid var(--green);display:none;}
+  .result.show{display:block;animation:rise .25s ease both;}
+  .result h4{margin:0 0 6px;color:var(--green);font-size:1rem;}
+  .result p{margin:0;font-size:.92rem;color:var(--ink);}
+  .dim-note{background:var(--surface-2);border:1px dashed var(--line);}
+
+  .note-warn{margin-top:14px;background:var(--red-bg);border:1px solid var(--red);color:var(--red);
+    border-radius:10px;padding:13px 15px;font-size:.9rem;font-weight:500;line-height:1.65;}
+
+  .improve{border:1px solid var(--line);border-inline-start:4px solid var(--amber);border-radius:10px;
+    padding:14px 16px;margin-bottom:12px;background:var(--surface-2);}
+  .improve h4{margin:0 0 9px;font-size:.98rem;display:flex;align-items:center;gap:9px;flex-wrap:wrap;}
+  .improve h4 .badge{font-size:.7rem;font-weight:700;color:#fff;background:var(--amber);
+    padding:2px 10px;border-radius:20px;}
+  .improve .row{margin:6px 0;font-size:.9rem;line-height:1.65;}
+  .improve .row .k{color:var(--amber);font-weight:700;}
+
+  .readygrid{display:grid;gap:10px;}
+  .ready{display:flex;align-items:flex-start;gap:12px;cursor:pointer;background:var(--amber-bg);
+    border:1px solid var(--amber);border-radius:10px;padding:13px 14px;transition:all .15s;user-select:none;}
+  .ready .rtick{flex:none;width:22px;height:22px;border-radius:6px;border:2px solid var(--amber);
+    background:var(--surface);display:grid;place-items:center;margin-top:2px;}
+  .ready[aria-checked="true"]{background:var(--green-bg);border-color:var(--green);}
+  .ready[aria-checked="true"] .rtick{background:var(--green);border-color:var(--green);}
+  .ready[aria-checked="true"] .rtick::after{content:"✓";color:#fff;font-size:13px;line-height:1;font-weight:700;}
+  .ready:focus-visible{outline:2px solid var(--brass);outline-offset:2px;}
+  .ready .rname{font-size:.93rem;font-weight:600;}
+  .ready .rstate{font-size:.8rem;color:var(--amber);font-weight:600;margin-top:3px;}
+  .ready[aria-checked="true"] .rstate{color:var(--green);}
+  .ready-note{margin-top:14px;background:var(--surface-2);border:1px dashed var(--line);border-radius:10px;
+    padding:13px 15px;font-size:.88rem;color:var(--ink-soft);line-height:1.65;}
+
+  footer.foot{border-top:1px solid var(--line);padding:22px 0;text-align:center;color:var(--ink-soft);font-size:.82rem;}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <p class="kicker">عرض للإدارة · عمليات الشراء والاستيراد</p>
+    <h1>من طلب الشراء إلى وصول البضاعة</h1>
+    <p class="lead">ثلاث مراحل تحكم نجاح أي صفقة استيراد. تنقّل بينها بالضغط على العناوين، وتفاعل مع كل مرحلة لفهم أين تكمن القوة وأين تكمن المخاطرة.</p>
+    <nav class="steps" role="tablist" aria-label="مراحل العملية">
+      <button class="step" role="tab" aria-selected="true" data-t="po">
+        <span class="num en">STAGE 1</span><span class="lbl">طلب شراء قوي</span>
+      </button>
+      <button class="step" role="tab" aria-selected="false" data-t="pay">
+        <span class="num en">STAGE 2</span><span class="lbl">خيارات الدفع</span>
+      </button>
+      <button class="step" role="tab" aria-selected="false" data-t="ship">
+        <span class="num en">STAGE 3</span><span class="lbl">الشحن</span>
+      </button>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- ============ STAGE 1 ============ -->
+  <section class="panel active" id="po" role="tabpanel">
+    <div class="panel-head">
+      <h2>ما الذي يجعل طلب الشراء قوياً؟</h2>
+      <p>طلب الشراء هو خط الدفاع الأول. كل بند غامض اليوم هو نزاع أو خسارة غداً. جرّب المعايير التالية على نموذجكم — كل بند مستوفى يرفع «مقياس القوة».</p>
+    </div>
+    <div class="card">
+      <h3>معايير المتانة</h3>
+      <p class="sub">البنود المفعّلة تعكس ما يستوفيه نموذجكم الحالي (الالباب)؛ والبنود غير المفعّلة هي فرص التحسين. اضغط أي بند لتعديله.</p>
+      <div class="checkgrid" id="checkgrid">
+        <div class="check" role="checkbox" aria-checked="true" tabindex="0"><span class="tick"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span><span>مواصفات فنية دقيقة (موديل، مقاس، مادة، معيار)</span></div>
+        <div class="check" role="checkbox" aria-checked="true" tabindex="0"><span class="tick"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span><span>الكمية ووحدة القياس واضحتان لا لبس فيهما</span></div>
+        <div class="check" role="checkbox" aria-checked="true" tabindex="0"><span class="tick"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span><span>السعر والعملة محدّدان بوضوح</span></div>
+        <div class="check" role="checkbox" aria-checked="true" tabindex="0"><span class="tick"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span><span>شرط التسليم (<span class="en">Incoterms 2020</span>) مذكور صراحةً</span></div>
+        <div class="check" role="checkbox" aria-checked="true" tabindex="0"><span class="tick"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span><span>جدول الدفعات مربوط بإنجازات (توقيع/فحص/شحن/وصول)</span></div>
+        <div class="check" role="checkbox" aria-checked="false" tabindex="0"><span class="tick"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span><span>مدة تسليم + غرامة تأخير رادعة (سقف ~10%)</span></div>
+        <div class="check" role="checkbox" aria-checked="true" tabindex="0"><span class="tick"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span><span>تطابق الوصف بين الطلب والفاتورة وشهادة المنشأ (<span class="en">H.S Code</span>)</span></div>
+        <div class="check" role="checkbox" aria-checked="true" tabindex="0"><span class="tick"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span><span>المستندات المطلوبة وتصديقها (غرفة تجارة + سفارة)</span></div>
+        <div class="check" role="checkbox" aria-checked="true" tabindex="0"><span class="tick"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span><span>ضمان جودة + فترة ضمان + آلية معالجة العيوب</span></div>
+        <div class="check" role="checkbox" aria-checked="false" tabindex="0"><span class="tick"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span><span>ضمان حسن أداء / اعتماد بنكي في الصفقات الكبيرة</span></div>
+        <div class="check" role="checkbox" aria-checked="false" tabindex="0"><span class="tick"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span><span>القانون الحاكم عادل / تحكيم محايد</span></div>
+        <div class="check" role="checkbox" aria-checked="false" tabindex="0"><span class="tick"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span><span>حق الفحص عند الوصول إلى الميناء</span></div>
+      </div>
+      <div class="meter-wrap">
+        <div class="meter-top">
+          <span class="verdict" id="verdict">ابدأ التقييم</span>
+          <span class="count en" id="count">0 / 12</span>
+        </div>
+        <div class="bar"><span id="meterFill"></span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>شرح بنود التحسين (غير المفعّلة)</h3>
+      <p class="sub">معنى كل بند ناقص في نموذجكم الحالي، وكيف تطبّقه لرفع قوة الطلب.</p>
+
+      <div class="improve">
+        <h4><span class="badge">غرامة</span> غرامة تأخير رادعة (سقف ~10%)</h4>
+        <div class="row"><span class="k">المعنى: </span>تعويض مالي يدفعه المورّد عن كل يوم تأخير عن موعد التسليم، بحدٍّ أقصى. السقف المنخفض (5%) يجعل التأخير رخيصاً على المورّد.</div>
+        <div class="row"><span class="k">كيف تُطبّق: </span>ارفع السقف في بند غرامات التأخير من 5% إلى 10% من قيمة العقد، مع نسبة يومية مؤثرة، لتجعل الالتزام بالموعد أجدى للمورّد من التأخّر.</div>
+      </div>
+
+      <div class="improve">
+        <h4><span class="badge en">Bond</span> ضمان حسن أداء / اعتماد بنكي</h4>
+        <div class="row"><span class="k">المعنى: </span>ضمان بنكي (<span class="en">Performance Bond</span>) بنسبة 5–10% من قيمة العقد يبقى سارياً حتى نهاية فترة الضمان، يمكنك تسييله إن أخلّ المورّد بالجودة أو التسليم.</div>
+        <div class="row"><span class="k">كيف تُطبّق: </span>أضِف بنداً يشترط تقديم المورّد ضماناً بنكياً غير مشروط من بنك معتبر عند توقيع العقد، بنسبة 5–10%، سارياً حتى انتهاء فترة الضمان.</div>
+      </div>
+
+      <div class="improve">
+        <h4><span class="badge">القانون</span> القانون الحاكم عادل / تحكيم محايد</h4>
+        <div class="row"><span class="k">المعنى: </span>البند الذي يحدّد قانون أي دولة يحكم العقد وأين يُفصل النزاع. النموذج الحالي يخضع حصراً لمحاكم دبي — لصالح المورّد لا لك.</div>
+        <div class="row"><span class="k">كيف تُطبّق: </span>استبدله بشرط تحكيم محايد (مثل <span class="en">ICC</span> أو <span class="en">DIAC</span> بقواعد ولغة واضحة)، أو قانون ومحكمة متّفق عليهما بتوازن، لتتجنّب التقاضي في بلد المورّد.</div>
+      </div>
+
+      <div class="improve">
+        <h4><span class="badge en">Inspection</span> حق الفحص عند الوصول</h4>
+        <div class="row"><span class="k">المعنى: </span>حقك التعاقدي في فحص البضاعة عند وصولها إلى أم قصر ورفض المعيب — إضافةً إلى فحص <span class="en">TPI</span> الذي يتم في مصنع المورّد قبل الشحن.</div>
+        <div class="row"><span class="k">كيف تُطبّق: </span>أضِف بند «<span class="en">Right of final inspection at destination</span>» يمنحك مهلة محددة بعد الوصول لفحص البضاعة والاعتراض على العيوب الظاهرة أو أضرار النقل.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ STAGE 2 ============ -->
+  <section class="panel" id="pay" role="tabpanel">
+    <div class="panel-head">
+      <h2>قنوات الدفع المتاحة لدينا</h2>
+      <p>لدينا ثلاث قنوات تمويل حقيقية. القرار بينها يوازن ثلاثة أمور: <b>سرعة الحوالة</b>، و<b>سعر الصرف (الكلفة)</b>، و<b>توفّر القناة</b> حسب طبيعة العقد. اختر قناة لعرض تفاصيلها.</p>
+    </div>
+
+    <div class="card fx-highlight">
+      <div class="big en">1325 <span style="font-size:1rem;color:var(--ink-soft)">مقابل</span> 1510</div>
+      <p style="margin:8px 0 0;font-size:.94rem;">السعر الرسمي يوفّر <b>185 ديناراً لكل دولار (~12%)</b>. على كل <span class="en">100,000$</span> توفير نحو <b>18.5 مليون دينار</b>.</p>
+      <p style="margin:8px 0 0;font-size:.92rem;">لكن انتبه: في <b>عقود الدولار</b> يتعذّر المزاد، فالوصول إلى 1325 يمرّ عبر <b>اليوم الجديد</b> ويكلّف <b>15% من الأرباح الصافية</b>. القاعدة: قارِن بالدينار توفيرَ الصرف (~12% من قيمة الاستيراد) مقابل ضريبة الـ15% (من صافي الربح) قبل القرار.</p>
+    </div>
+
+    <div class="pay-tabs" id="payTabs"></div>
+    <div class="pay-detail" id="payDetail"></div>
+
+    <div class="card helper" style="margin-top:18px;">
+      <h3>أي قناة تناسب هذه الصفقة؟</h3>
+      <p class="sub">أجب عن السؤالين ليقترح النظام المسار الأنسب.</p>
+      <div class="q">
+        <p>ما عملة العقد مع المستفيد النهائي؟</p>
+        <div class="opts">
+          <button class="opt-btn" data-g="cur" data-v="usd" aria-pressed="false">دولار</button>
+          <button class="opt-btn" data-g="cur" data-v="iqd" aria-pressed="false">دينار</button>
+        </div>
+      </div>
+      <div class="q">
+        <p>هل الدفع عاجل والوقت حرج؟</p>
+        <div class="opts">
+          <button class="opt-btn" data-g="urgent" data-v="yes" aria-pressed="false">نعم</button>
+          <button class="opt-btn" data-g="urgent" data-v="no" aria-pressed="false">لا</button>
+        </div>
+      </div>
+      <div class="result" id="hlpResult"><h4></h4><p></p></div>
+    </div>
+
+    <div class="card dim-note">
+      <h3 style="font-size:1rem;margin-bottom:6px;">بُعد مكمّل: كيف تُؤمّن الدفعة تجاه المورّد؟</h3>
+      <p class="sub" style="margin:0;">القنوات الثلاث أعلاه تخصّ <b>مصدر التمويل وسعر الصرف</b>. يبقى قرار منفصل: كيف تحمي نفسك من تعثّر المورّد — دفعة مقدمة محدودة، أو دفع بالمراحل مربوط ببوليصة الشحن، أو اعتماد مستندي في الصفقات الكبيرة مع مورّد جديد. القناة تحدّد «من أين المال وبأي سعر»، وأداة الدفع تحدّد «كيف تحمي مالك».</p>
+    </div>
+  </section>
+
+  <!-- ============ STAGE 3 ============ -->
+  <section class="panel" id="ship" role="tabpanel">
+    <div class="panel-head">
+      <h2>الشحن</h2>
+      <p>كلمة واحدة في العقد (<span class="en">FOB · CIF · DDP</span>…) تحدّد من يدفع الشحن، ومن يتحمّل التأمين، ومتى تنتقل المخاطرة إليك. اختر مصطلحاً لترى رحلة البضاعة تتلوّن.</p>
+    </div>
+    <div class="card">
+      <div class="term-chips" id="termChips"></div>
+      <div class="journey">
+        <div class="legs" id="legs">
+          <div class="leg" data-leg="0"><div class="ico">🏭</div><div class="lname">مصنع / مستودع المورّد</div></div>
+          <div class="leg" data-leg="1"><div class="ico">🚚</div><div class="lname">تخليص تصديري + نقل داخلي</div></div>
+          <div class="leg" data-leg="2"><div class="ico">🚢</div><div class="lname">الشحن البحري</div></div>
+          <div class="leg" data-leg="3"><div class="ico">⚓</div><div class="lname">ميناء أم قصر + تخليص استيرادي</div></div>
+          <div class="leg" data-leg="4"><div class="ico">📦</div><div class="lname">التسليم إلى مستودعك</div></div>
+        </div>
+        <div class="legend-row">
+          <span class="k"><span class="box" style="background:var(--navy)"></span> على حساب المورّد</span>
+          <span class="k"><span class="box" style="background:var(--surface-2);border:1px solid var(--line)"></span> على حسابك</span>
+          <span class="k"><span class="box" style="background:var(--red)"></span> نقطة انتقال المخاطرة</span>
+        </div>
+      </div>
+      <div class="term-info" id="termInfo"></div>
+    </div>
+    <p style="font-size:.82rem;color:var(--ink-soft);margin:4px 4px;">* عرض مبسّط لأغراض الشرح؛ الالتزامات التفصيلية تتبع نصّ <span class="en">Incoterms 2020</span> الرسمي.</p>
+
+    <div class="card">
+      <h3>الرسوم الكمركية التقريبية حسب التصنيف</h3>
+      <p class="sub">نطاقات إرشادية فقط — الرسم المُلزم يُحدَّد ببند التعرفة (<span class="en">HS Code</span>) في قانون التعرفة رقم 22 لسنة 2010، ونسبه تتراوح بين 0% و80% حسب السلعة. «الفصل» هو أول رقمين من نظام <span class="en">HS</span> العالمي، والبند الكامل يحدّد النسبة بدقة.</p>
+      <div class="scroll">
+        <table>
+          <thead>
+            <tr><th>التصنيف</th><th class="c"><span class="en">HS Code</span></th><th class="c">الرسم التقريبي</th><th>ملاحظة</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>المواد الأولية والمدخلات الصناعية</td><td class="c">متعدّد (حسب المادة)</td><td class="c">0 – 5%</td><td>الأدنى — لتشجيع الإنتاج المحلي</td></tr>
+            <tr><td>الآلات والمعدات الصناعية</td><td class="c en">84 – 85</td><td class="c">0 – 10%</td><td>يختلف حسب المعدة</td></tr>
+            <tr><td>الحديد والصلب المصنّع (مقاطع، أنابيب، تسليح)</td><td class="c en">72 – 73</td><td class="c">~10 – 15%</td><td>قد يرتفع حمايةً للصناعة المحلية</td></tr>
+            <tr><td>الكابلات والمستلزمات الكهربائية</td><td class="c en">85 · 8544</td><td class="c">~10 – 15%</td><td>المكوّنات أقل من الأجهزة النهائية</td></tr>
+            <tr><td>الأجهزة الكهربائية المنزلية النهائية</td><td class="c en">84 – 85<br>8418 · 8450 · 8415</td><td class="c">~15 – 30%</td><td>ثلاجة/غسالة/تكييف — الأعلى</td></tr>
+            <tr><td>السلع الاستهلاكية النهائية عموماً</td><td class="c">متعدّد الفصول</td><td class="c">~15 – 30%</td><td>حسب البند والغرض</td></tr>
+            <tr><td>بنود غير مدرجة في جدول التعرفة</td><td class="c">—</td><td class="c">حتى 20%</td><td>سقف نصّ عليه القانون</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="when" style="margin-top:16px;"><b>يُضاف إلى الرسم أعلاه: </b>رسم إعادة الإعمار (~5% عادةً)، وأجور الموانئ والتخزين، وأجور المخلّص الجمركي. فالكلفة النهائية = قيمة البضاعة (<span class="en">CIF</span>) + الرسم الكمركي + رسم إعادة الإعمار + أجور الميناء + أجور التخليص.</div>
+      <div class="note-warn">⚠ هذه النسب إرشادية وقابلة للتغيّر. بدأت الكمارك تطبيق التعرفة الكاملة تدريجياً (القرار 957 لسنة 2025) بعد سنوات من الاكتفاء بنحو 5%، وأُجريت تعديلات على القيم الاستيرادية مطلع 2026. تحقّق دائماً من الرسم الفعلي ببند الـ<span class="en">HS Code</span> عبر مخلّص جمركي مرخّص أو نظام الأسيكودا قبل التسعير.</div>
+    </div>
+
+    <div class="card">
+      <h3>الوضع القانوني لشركة اليوم الجديد (وسيلة الاستيراد)</h3>
+      <p class="sub">اليوم الجديد هي شركتكم التي تستورد للوصول إلى السعر الرسمي في عقود الدولار. لتصبح جاهزة للاستيراد فعلياً، ينقصها استكمال ما يلي — اضغط البند عند إتمامه.</p>
+      <div class="readygrid" id="readygrid">
+        <div class="ready" role="checkbox" aria-checked="false" tabindex="0">
+          <span class="rtick"></span>
+          <div><div class="rname">استكمال تحديث بيانات الحساب البنكي في المصرف الأهلي العراقي</div><div class="rstate">قيد الإنجاز — مطلوب للاستيراد</div></div>
+        </div>
+        <div class="ready" role="checkbox" aria-checked="false" tabindex="0">
+          <span class="rtick"></span>
+          <div><div class="rname">استكمال إنشاء حساب في نظام أسيكودا الجمركي العراقي</div><div class="rstate">قيد الإنجاز — مطلوب للاستيراد</div></div>
+        </div>
+      </div>
+      <div class="ready-note">حتى استكمال هذين البندين، تُنفَّذ عقود الدولار عبر المشرق بسعر السوق (~1510). وبعد جاهزية اليوم الجديد يصبح الاستيراد عبرها متاحاً بالسعر الرسمي (1325) مع ضريبة 15% على صافي الربح.</div>
+    </div>
+
+    <div class="iraq-note">
+      <h3>🇮🇶 اعتبارات خاصة بالسوق العراقي</h3>
+      <ul>
+        <li>تحويل العملة الأجنبية يمرّ عبر آلية البنك المركزي ومتطلبات الامتثال — قد يؤثر ذلك على سرعة وكلفة الحوالة، فخطّط لتوقيتها مبكراً.</li>
+        <li>تصديق الفاتورة وشهادة المنشأ: <b>غرفة التجارة في بلد المنشأ أولاً</b>، ثم السفارة العراقية — الترتيب معكوساً يسبّب تأخيراً.</li>
+        <li>يجب أن تصل المستندات الأصلية <b>قبل</b> وصول البضاعة إلى أم قصر لتجنّب غرامات تأخّر الحاويات (<span class="en">demurrage</span>).</li>
+        <li>احرص على تطابق <span class="en">H.S Code</span> والوصف في جميع المستندات لتفادي تعطّل التخليص الجمركي.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- (تمت إزالة مرحلة أسلوب الاتفاق) -->
+
+</main>
+
+<footer class="foot">
+  <div class="wrap">أداة شرح داخلية لعمليات الشراء والاستيراد · للاستخدام الإداري</div>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------- tab navigation ---------- */
+  var steps=document.querySelectorAll('.step');
+  var panels=document.querySelectorAll('.panel');
+  steps.forEach(function(s){
+    s.addEventListener('click',function(){
+      var t=s.getAttribute('data-t');
+      steps.forEach(function(x){x.setAttribute('aria-selected', x===s?'true':'false');});
+      panels.forEach(function(p){p.classList.toggle('active', p.id===t);});
+      window.scrollTo({top:0,behavior:'smooth'});
+    });
+  });
+
+  /* ---------- stage 1: checklist ---------- */
+  var checks=document.querySelectorAll('.check');
+  var total=checks.length;
+  var fill=document.getElementById('meterFill');
+  var verdict=document.getElementById('verdict');
+  var count=document.getElementById('count');
+  function grade(){
+    var n=0;
+    checks.forEach(function(c){ if(c.getAttribute('aria-checked')==='true') n++; });
+    var pct=Math.round(n/total*100);
+    fill.style.width=pct+'%';
+    count.textContent=n+' / '+total;
+    var color,label;
+    if(n<=4){color='var(--red)';label='ضعيف — معرّض للنزاع';}
+    else if(n<=8){color='var(--amber)';label='متوسط — يحتاج تحصيناً';}
+    else if(n<=11){color='var(--green)';label='قوي';}
+    else{color='var(--brass)';label='محكم ✦';}
+    fill.style.background=color;
+    verdict.textContent=label;
+    verdict.style.color=color;
+  }
+  function toggle(c){
+    c.setAttribute('aria-checked', c.getAttribute('aria-checked')==='true'?'false':'true');
+    grade();
+  }
+  checks.forEach(function(c){
+    c.addEventListener('click',function(){toggle(c);});
+    c.addEventListener('keydown',function(e){
+      if(e.key===' '||e.key==='Enter'){e.preventDefault();toggle(c);}
+    });
+  });
+  grade();
+
+  /* ---------- stage 2: real payment channels ---------- */
+  var methods=[
+    {id:'mashreq',name:'مصرف المشرق (الإمارات)',tag:'UAE Account · Mashreq Bank',dot:'var(--amber)',
+     speed:'fast',speedTxt:'3 – 6 أيام',
+     cost:'high',rateTxt:'≈ 1510 (سعر السوق)',
+     avail:'always',availTxt:'متاح دائماً',
+     pros:['الأسرع — حوالة خلال 3 إلى 6 أيام','لا قيد على نوع العقد أو عملته','مرونة عالية للمواعيد الحرجة'],
+     cons:['الأغلى — شراء الدولار بسعر السوق (~1510)','كلفة صرف أعلى بنحو 12% من السعر الرسمي'],
+     when:'حين يكون الوقت حرجاً، أو حين تتعذّر القنوات الرسمية والمبلغ لا يبرّر انتظارها.'},
+    {id:'mazad',name:'المزاد — عبر شركة الالباب',tag:'CBI Currency Window',dot:'var(--green)',
+     speed:'slow',speedTxt:'10 – 20 يوماً',
+     cost:'low',rateTxt:'1325 (السعر الرسمي)',
+     avail:'cond',availTxt:'مشروط: غير متاح إذا كان العقد بالدولار',
+     pros:['أرخص سعر صرف: 1325 بدل 1510 — توفير ~12%','قناة رسمية مباشرة دون ضريبة إضافية','الأنسب للمبالغ الكبيرة'],
+     cons:['بطيء: من 10 إلى 20 يوماً','غير متاح إذا تعاقد المستفيد النهائي معنا بالدولار — عندها يلزم الاستيراد عبر اليوم الجديد'],
+     when:'العقود المقوّمة بالدينار مع المستفيد النهائي — يتم التحويل مباشرةً عبر شركة الالباب بالسعر الرسمي.'},
+    {id:'yaum',name:'الاستيراد عبر شركة اليوم الجديد',tag:'Import via Al-Yaum Al-Jadeed',dot:'var(--brass)',
+     speed:'mid',speedTxt:'قناة رسمية (أبطأ من المشرق)',
+     cost:'low',rateTxt:'1325 (رسمي) + ضريبة 15%',
+     avail:'cond',availTxt:'البديل لعقود الدولار (تعذّر المزاد)',
+     pros:['يتيح السعر الرسمي (1325) حتى عندما يكون العقد بالدولار','شركة اليوم الجديد تتولّى الاستيراد فتُصبح القناة الرسمية متاحة','يحلّ محلّ المزاد عند تعذّره'],
+     cons:['يُلزم اليوم الجديد بالإفصاح عن هذه العقود في الحسابات الختامية','يُحمّل الشركة ضريبة 15% من الأرباح الصافية على هذه العقود','أبطأ من الحوالة عبر المشرق'],
+     when:'عندما يكون العقد بالدولار (فيتعذّر المزاد) وتريد السعر الرسمي — بشرط أن يبقى توفيرُ الصرف أكبر من كلفة ضريبة الـ15%.'}
+  ];
+  var payTabs=document.getElementById('payTabs');
+  var payDetail=document.getElementById('payDetail');
+  function bar(w,cls){return '<div class="g-bar"><span class="'+cls+'" style="width:'+w+'"></span></div>';}
+  function renderPay(m){
+    var sp=m.speed==='fast'?['90%','fill-low','lvl-low']:m.speed==='mid'?['58%','fill-mid','lvl-mid']:['33%','fill-high','lvl-high'];
+    var co=m.cost==='low'?['33%','fill-low','lvl-low']:['92%','fill-high','lvl-high'];
+    var av=m.avail==='always'?['100%','fill-low','lvl-low']:['55%','fill-mid','lvl-mid'];
+    payDetail.innerHTML=
+      '<div class="dhead"><h3>'+m.name+'</h3><span class="tag en">'+m.tag+'</span></div>'+
+      '<div class="pay-body">'+
+        '<div class="gauges">'+
+          '<div class="gauge"><div class="g-lbl">السرعة</div>'+bar(sp[0],sp[1])+'<div class="g-val '+sp[2]+'">'+m.speedTxt+'</div></div>'+
+          '<div class="gauge"><div class="g-lbl">الكلفة (سعر الصرف)</div>'+bar(co[0],co[1])+'<div class="g-val '+co[2]+'">'+m.rateTxt+'</div></div>'+
+          '<div class="gauge"><div class="g-lbl">التوفّر</div>'+bar(av[0],av[1])+'<div class="g-val '+av[2]+'">'+m.availTxt+'</div></div>'+
+        '</div>'+
+        '<div class="pros-cons">'+
+          '<div class="pc pros"><h4>✔ الإيجابيات</h4><ul>'+m.pros.map(function(p){return '<li>'+p+'</li>';}).join('')+'</ul></div>'+
+          '<div class="pc cons"><h4>△ ما ينبغي مراعاته</h4><ul>'+m.cons.map(function(p){return '<li>'+p+'</li>';}).join('')+'</ul></div>'+
+        '</div>'+
+        '<div class="when"><b>متى تختارها؟ </b>'+m.when+'</div>'+
+      '</div>';
+  }
+  methods.forEach(function(m,i){
+    var b=document.createElement('button');
+    b.className='pay-chip';b.setAttribute('role','tab');
+    b.setAttribute('aria-selected', i===0?'true':'false');
+    b.innerHTML='<span class="dot" style="background:'+m.dot+'"></span>'+m.name;
+    b.addEventListener('click',function(){
+      payTabs.querySelectorAll('.pay-chip').forEach(function(x){x.setAttribute('aria-selected','false');});
+      b.setAttribute('aria-selected','true');
+      renderPay(m);
+    });
+    payTabs.appendChild(b);
+  });
+  renderPay(methods[0]);
+
+  /* ---------- stage 2: decision helper ---------- */
+  var hlp={cur:null,urgent:null};
+  function hlpRender(){
+    var r=document.getElementById('hlpResult');
+    if(!r) return;
+    if(hlp.cur===null||hlp.urgent===null){r.classList.remove('show');return;}
+    var title,body;
+    if(hlp.urgent==='yes'){
+      title='مصرف المشرق (الإمارات)';
+      body='الوقت حرج، فالسرعة (3–6 أيام) هي الأولوية بسعر السوق (~1510). إن كان المبلغ كبيراً، وازِن توفير القناة الرسمية مقابل التأخير قبل حسم القرار.';
+    } else if(hlp.cur==='iqd'){
+      title='المزاد — عبر شركة الالباب';
+      body='العقد بالدينار يتيح المزاد مباشرةً بالسعر الرسمي (1325) دون حاجة لليوم الجديد ودون ضريبة إضافية. احتسب مهلة 10–20 يوماً ضمن جدولك.';
+    } else {
+      title='المزاد متعذّر — وازِن بين اليوم الجديد والمشرق';
+      body='العقد بالدولار يمنع المزاد. للسعر الرسمي (1325) استورِد عبر اليوم الجديد، لكنها تُفصح عن العقد وتتحمّل 15% ضريبة على صافي الربح. البديل: المشرق بسعر 1510 دون ضريبة. القاعدة: احسب بالدينار — إن كان توفير الصرف (~12% من قيمة الاستيراد) أكبر من ضريبة الـ15% (من صافي الربح) فاليوم الجديد أوفر، والعكس صحيح.';
+    }
+    r.querySelector('h4').textContent='المسار المقترح: '+title;
+    r.querySelector('p').textContent=body;
+    r.classList.add('show');
+  }
+  document.querySelectorAll('.opt-btn').forEach(function(b){
+    b.addEventListener('click',function(){
+      var g=b.getAttribute('data-g'), v=b.getAttribute('data-v');
+      var siblings=b.parentNode.querySelectorAll('.opt-btn');
+      siblings.forEach(function(x){x.setAttribute('aria-pressed','false');});
+      b.setAttribute('aria-pressed','true');
+      hlp[g]=v; hlpRender();
+    });
+  });
+
+  /* ---------- stage 3: incoterms ---------- */
+  // sellerTo = last leg index paid by seller ; riskAt = first leg index at buyer's risk (-1 = stays with seller)
+  var terms=[
+    {c:'EXW',sellerTo:-1,riskAt:0,ins:false,
+     buyer:'أقصى سيطرة على الشحن واختيار الناقل، لكن أقصى عبء عليك — بما فيه التخليص التصديري في بلد أجنبي. غير منصوح للمستورد المبتدئ.',
+     note:'المورّد يجعل البضاعة جاهزة عند بابه فقط؛ كل شيء بعد ذلك عليك.'},
+    {c:'FOB',sellerTo:1,riskAt:2,ins:false,
+     buyer:'توازن جيد وشائع في العراق. المورّد يسلّم على ظهر السفينة، وأنت تتحكم بالشحن البحري والتأمين — قد يكون أرخص لك.',
+     note:'المخاطرة تنتقل إليك بمجرّد تحميل البضاعة على السفينة.'},
+    {c:'CFR',sellerTo:2,riskAt:2,ins:false,
+     buyer:'المورّد يرتّب ويدفع الشحن حتى أم قصر — عناء لوجستي أقل عليك. لكن انتبه: التأمين مسؤوليتك، والخطر ينتقل مبكراً عند التحميل.',
+     note:'الكلفة تمتدّ حتى الميناء، لكن المخاطرة تنتقل عند التحميل — فجوة يجب تغطيتها بتأمين على حسابك.'},
+    {c:'CIF',sellerTo:2,riskAt:2,ins:true,
+     buyer:'الأسهل للمستورد المبتدئ — المورّد يرتّب الشحن والتأمين حتى الميناء. لكن التأمين غالباً بالحد الأدنى، والخطر ينتقل عند التحميل.',
+     note:'مثل CFR لكن مع تأمين على الشحن البحري يوفّره المورّد (بحدّ أدنى غالباً).'},
+    {c:'DAP',sellerTo:4,riskAt:-1,ins:false,
+     buyer:'المورّد يوصل حتى قربك بأقل عبء لوجستي عليك، لكن التخليص الاستيراديّ ورسومه تبقى عليك.',
+     note:'المورّد يتحمّل الكلفة والمخاطرة حتى موقع التسليم؛ الجمارك الاستيرادية عليك.'},
+    {c:'DDP',sellerTo:4,riskAt:-1,ins:false,
+     buyer:'أقصى راحة — المورّد يوصّل ويخلّص كل شيء حتى بابك. لكنه أغلى، وقد لا يقبله المورّد لتعقيد الجمارك العراقية، وقد تفقد الشفافية على الرسوم.',
+     note:'المورّد يتحمّل كل شيء حتى بابك، بما في ذلك الرسوم الجمركية الاستيرادية.'}
+  ];
+  var legs=document.querySelectorAll('#legs .leg');
+  var termChips=document.getElementById('termChips');
+  var termInfo=document.getElementById('termInfo');
+  function renderTerm(t){
+    legs.forEach(function(l,i){
+      l.classList.toggle('seller', t.sellerTo>=i);
+      l.classList.remove('risk-here');
+    });
+    if(t.riskAt>=0 && legs[t.riskAt]) legs[t.riskAt].classList.add('risk-here');
+    termInfo.innerHTML=
+      '<div class="ti"><h4>ماذا يعني للمشتري؟</h4><p>'+t.buyer+'</p>'+(t.ins?'<span class="ins-badge">✔ يشمل تأميناً على الشحن البحري</span>':'')+'</div>'+
+      '<div class="ti"><h4>الفكرة باختصار</h4><p>'+t.note+'</p></div>';
+  }
+  terms.forEach(function(t,i){
+    var b=document.createElement('button');
+    b.className='term-chip en';b.textContent=t.c;
+    b.setAttribute('aria-selected', i===1?'true':'false'); // default FOB
+    b.addEventListener('click',function(){
+      termChips.querySelectorAll('.term-chip').forEach(function(x){x.setAttribute('aria-selected','false');});
+      b.setAttribute('aria-selected','true');
+      renderTerm(t);
+    });
+    termChips.appendChild(b);
+  });
+  renderTerm(terms[1]);
+
+  /* ---------- stage 3: Al-Yaum readiness tracker ---------- */
+  document.querySelectorAll('.ready').forEach(function(r){
+    function upd(){
+      var done=r.getAttribute('aria-checked')==='true';
+      var st=r.querySelector('.rstate');
+      if(st) st.textContent = done ? 'مكتمل ✓' : 'قيد الإنجاز — مطلوب للاستيراد';
+    }
+    function tog(){ r.setAttribute('aria-checked', r.getAttribute('aria-checked')==='true'?'false':'true'); upd(); }
+    r.addEventListener('click',tog);
+    r.addEventListener('keydown',function(e){ if(e.key===' '||e.key==='Enter'){ e.preventDefault(); tog(); } });
+  });
+
+})();
+</script>
+</body>
+</html>
