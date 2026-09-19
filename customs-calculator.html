@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>حاسبة التعرفة الجمركية — عدة مواد</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@300..700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#e4ebf2;--surface:#fff;--surface-2:#f4f7fa;--ink:#12283d;--ink-soft:#5a6b7b;
+  --line:#d5dee8;--navy:#0f3049;--navy-2:#1b4a6b;--navy-ink:#eaf1f7;--brass:#b0842e;
+  --brass-bg:#f5ecd6;--green:#1c855a;--green-bg:#e3f3ec;--amber:#bf871c;--amber-bg:#f8eecf;
+  --red:#c0392b;--red-bg:#fbe8e5;
+  --shadow:0 1px 2px rgba(16,48,73,.05),0 10px 28px rgba(16,48,73,.07);
+}
+*{box-sizing:border-box}
+html,body{min-height:100%}
+body{
+  margin:0;background:
+    radial-gradient(1200px 500px at 8% -15%,rgba(176,132,46,.13),transparent 55%),
+    radial-gradient(900px 480px at 100% 0%,rgba(27,74,107,.12),transparent 50%),
+    var(--bg);
+  color:var(--ink);font-family:"Readex Pro","IBM Plex Sans",system-ui,sans-serif;
+  line-height:1.6;-webkit-font-smoothing:antialiased;
+}
+.en{font-family:"IBM Plex Sans",sans-serif;direction:ltr;unicode-bidi:isolate;font-feature-settings:"tnum" 1}
+.wrap{width:100%;max-width:100%;margin:0 auto;padding:0 clamp(14px,2vw,28px)}
+
+/* top bar */
+.topbar{
+  position:sticky;top:0;z-index:50;
+  backdrop-filter:saturate(1.2) blur(10px);
+  background:rgba(15,48,73,.92);color:#eaf1f7;
+  border-bottom:1px solid rgba(176,132,46,.35);
+}
+.topbar-inner{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:10px clamp(14px,2vw,28px);flex-wrap:wrap;
+}
+.topbar .brand{font-weight:700;font-size:.95rem}
+.topbar .brand small{display:block;font-weight:400;opacity:.7;font-size:.75rem;margin-top:1px}
+.top-actions{display:flex;gap:8px;flex-wrap:wrap}
+
+header.hero{
+  background:linear-gradient(158deg,var(--navy),var(--navy-2));
+  color:var(--navy-ink);padding:28px 0 22px;position:relative;
+}
+header.hero::after{content:"";position:absolute;inset-inline:0;bottom:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(176,132,46,.55),transparent)}
+.hero-grid{
+  display:grid;grid-template-columns:1.4fr .9fr;gap:18px;align-items:end;
+}
+@media (max-width:960px){.hero-grid{grid-template-columns:1fr}}
+.kicker{margin:0 0 8px;color:var(--brass);font-weight:600;font-size:.84rem}
+header h1{margin:0;font-size:clamp(1.45rem,2.4vw,2.15rem);font-weight:700;line-height:1.3}
+header p{margin:10px 0 0;color:#c6d4e2;font-size:.95rem;max-width:75ch}
+.meta-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.pill{
+  background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);
+  border-radius:999px;padding:6px 12px;font-size:.8rem;color:#d5e4f0;
+}
+.hero-stats{
+  display:grid;grid-template-columns:1fr 1fr;gap:10px;
+}
+.hero-stat{
+  background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);
+  border-radius:14px;padding:14px 16px;
+}
+.hero-stat .lbl{font-size:.75rem;color:#9fb4c6;margin-bottom:4px}
+.hero-stat .val{font-family:"IBM Plex Sans";font-feature-settings:"tnum" 1;font-size:1.2rem;font-weight:700}
+
+main{padding:18px 0 48px;display:grid;gap:14px}
+.layout-top{
+  display:grid;grid-template-columns:1.55fr .85fr;gap:14px;align-items:start;
+}
+@media (max-width:1100px){.layout-top{grid-template-columns:1fr}}
+.card{
+  background:var(--surface);border:1px solid var(--line);border-radius:16px;
+  box-shadow:var(--shadow);padding:18px 20px;
+}
+.card h2{margin:0 0 4px;font-size:1.08rem}
+.card .sub{margin:0 0 12px;color:var(--ink-soft);font-size:.86rem}
+.card-head{
+  display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:8px;
+}
+label.field{display:block}
+label.field > span{display:block;font-size:.78rem;font-weight:600;margin-bottom:5px;color:var(--ink-soft)}
+input,select{
+  width:100%;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);
+  border-radius:10px;padding:10px 11px;font:inherit;outline:none;
+}
+input:focus,select:focus{border-color:var(--brass);box-shadow:0 0 0 3px rgba(176,132,46,.18);background:#fff}
+input.num{font-family:"IBM Plex Sans";font-feature-settings:"tnum" 1}
+.toolbar{display:grid;grid-template-columns:minmax(280px,1.6fr) .55fr .7fr auto;gap:10px;align-items:end}
+@media (max-width:900px){.toolbar{grid-template-columns:1fr 1fr}}
+.search-box{position:relative}
+#results{
+  position:absolute;z-index:30;inset-inline:0;top:calc(100% + 6px);max-height:340px;overflow:auto;
+  border:1px solid var(--line);border-radius:12px;background:#fff;box-shadow:var(--shadow);display:none;
+}
+#results.open{display:block}
+.result{
+  width:100%;text-align:start;border:0;border-bottom:1px solid var(--line);
+  background:transparent;padding:10px 12px;cursor:pointer;font:inherit;color:inherit;
+}
+.result:hover{background:var(--brass-bg)}
+.result .t{font-weight:600;font-size:.9rem}
+.result .d{font-size:.78rem;color:var(--ink-soft)}
+.codes{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
+.tag{
+  font-family:"IBM Plex Sans";font-size:.7rem;background:var(--surface-2);
+  border:1px solid var(--line);border-radius:6px;padding:2px 6px;color:var(--ink-soft);
+}
+.btn{
+  border:0;border-radius:10px;padding:11px 14px;font:inherit;font-weight:600;cursor:pointer;
+  background:var(--navy);color:#fff;white-space:nowrap;
+}
+.btn:hover{background:var(--navy-2)}
+.btn.ghost{background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.18)}
+.btn.ghost.dark{background:transparent;color:var(--navy);border:1px solid var(--line)}
+.btn.print{background:var(--brass);color:#1a1408}
+.btn.print:hover{background:#9a7224}
+.btn.danger{background:var(--red-bg);color:var(--red);border:1px solid rgba(192,57,43,.25)}
+.btn.sm{padding:7px 10px;font-size:.8rem}
+.settings{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:12px}
+@media (max-width:900px){.settings{grid-template-columns:1fr 1fr}}
+.formula{
+  margin-top:12px;padding:11px 13px;border-radius:10px;background:var(--amber-bg);
+  border:1px solid rgba(191,135,28,.25);font-size:.82rem;
+}
+.summary{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.sum-box{
+  background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:13px 14px;
+}
+.sum-box.grand{
+  grid-column:1 / -1;
+  background:linear-gradient(158deg,var(--navy),var(--navy-2));color:#fff;border:0;
+}
+.sum-box .lbl{font-size:.76rem;opacity:.85;margin-bottom:4px}
+.sum-box .val{font-family:"IBM Plex Sans";font-feature-settings:"tnum" 1;font-size:1.18rem;font-weight:700}
+.note{margin-top:10px;font-size:.76rem;color:var(--ink-soft)}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.badge-warn{color:#8e2a20;font-size:.74rem;margin-top:4px}
+.legend-limits{
+  display:flex;flex-wrap:wrap;gap:8px;margin:0 0 10px;font-size:.76rem;color:var(--ink-soft);
+}
+.legend-limits span{
+  display:inline-flex;align-items:center;gap:6px;
+  background:var(--surface-2);border:1px solid var(--line);border-radius:999px;padding:4px 10px;
+}
+.legend-swatch{width:10px;height:10px;border-radius:3px;display:inline-block}
+.legend-swatch.lim{background:#e8d59a;border:1px solid #c4a45a}
+.legend-swatch.res{background:#cfe8db;border:1px solid #7fb89a}
+.legend-swatch.nw{background:#b7dfcb;border:1px solid #4fa87e}
+
+/* table — full browser width */
+.table-card{padding:16px 12px 18px}
+.table-wrap{
+  width:100%;overflow:auto;border:1px solid #c5d0dc;border-radius:14px;
+  background:#fff;max-height:min(70vh,820px);
+}
+table.lines{
+  width:100%;border-collapse:separate;border-spacing:0;
+  min-width:100%;font-size:.82rem;table-layout:auto;
+}
+table.lines thead th{
+  background:linear-gradient(180deg,#163a54,#0f3049);color:#e8f0f7;
+  font-weight:600;font-size:.7rem;text-align:center;white-space:nowrap;
+  position:sticky;top:0;z-index:3;padding:11px 8px;
+  border-inline-end:1px solid rgba(255,255,255,.1);border-bottom:2px solid var(--brass);
+}
+table.lines thead th:last-child{border-inline-end:0}
+table.lines thead th.th-start{text-align:start}
+table.lines thead .th-sub{display:block;font-weight:400;opacity:.7;font-size:.65rem;margin-top:2px}
+table.lines tbody td{
+  padding:10px 8px;vertical-align:middle;text-align:center;
+  border-bottom:1px solid #e2e8ef;border-inline-end:1px solid #eef2f6;background:#fff;
+}
+table.lines tbody td:last-child{border-inline-end:0}
+table.lines tbody tr:nth-child(even) td{background:#f7fafc}
+table.lines tbody tr:hover td{background:#f3f0e6}
+table.lines tbody tr:last-child td{border-bottom:0}
+table.lines td.td-start{text-align:start;min-width:220px;max-width:340px}
+table.lines td.col-idx{width:40px;color:var(--ink-soft);font-family:"IBM Plex Sans";font-weight:600}
+table.lines td.col-limits{background:#fbf6ea !important;min-width:84px}
+table.lines tr:nth-child(even) td.col-limits{background:#f7efd9 !important}
+table.lines tr:hover td.col-limits{background:#f3e6c4 !important}
+.limit-box{display:flex;flex-direction:column;gap:1px;align-items:center}
+.limit-box .limit-lbl{font-size:.62rem;color:#8a7340;font-weight:600}
+.limit-box .limit-val{
+  font-family:"IBM Plex Sans";font-feature-settings:"tnum" 1;
+  font-weight:700;font-size:.88rem;color:#6b5420;
+}
+.limit-box .limit-val.muted{font-weight:500;color:var(--ink-soft);font-size:.8rem}
+table.lines td.col-input{min-width:78px;padding:6px}
+table.lines td.col-input input{
+  padding:7px 6px;border-radius:8px;text-align:center;background:#fff;
+  border-color:#cfd8e3;width:100%;max-width:108px;margin:0 auto;display:block;
+}
+table.lines td.col-price input.below-min{border-color:var(--red);background:var(--red-bg)}
+table.lines td.col-price input.above-max{border-color:var(--amber);background:var(--amber-bg)}
+table.lines td.col-result{background:#f3f8f5 !important}
+table.lines tr:nth-child(even) td.col-result{background:#eaf4ef !important}
+table.lines td.col-new{background:#e8f5ef !important}
+.item-name{font-weight:600;line-height:1.35;font-size:.88rem}
+.item-desc{
+  color:var(--ink-soft);font-size:.74rem;margin-top:2px;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+}
+.money{font-family:"IBM Plex Sans";font-feature-settings:"tnum" 1;white-space:nowrap;font-size:.82rem}
+.new-price{
+  font-weight:700;color:#146c48;background:#fff;
+  border:1px solid rgba(28,133,90,.28);border-radius:8px;
+  padding:6px 8px;display:inline-block;font-size:.86rem;
+}
+.price-hint{font-size:.66rem;margin-top:3px;font-weight:600}
+.price-hint.low{color:var(--red)}
+.price-hint.high{color:#9a6c10}
+.empty{padding:40px;text-align:center;color:var(--ink-soft);background:#fafbfc}
+
+.print-only{display:none}
+
+/* ========== A4 PRINT ========== */
+@media print{
+  @page{
+    size: A4 landscape;
+    margin: 8mm 7mm;
+  }
+  html,body{
+    background:#fff !important;color:#000 !important;
+    -webkit-print-color-adjust:exact;print-color-adjust:exact;
+  }
+  .no-print,.topbar,#results,.search-box,.toolbar,.formula,
+  .legend-limits,.actions,.btn,.note,.hero-stats,.card .sub{display:none !important}
+  .print-only{display:block !important}
+  header.hero{
+    background:#fff !important;color:#000 !important;padding:0 0 6px;border-bottom:2px solid #0f3049;
+  }
+  header.hero::after{display:none}
+  header h1{font-size:16pt;color:#0f3049}
+  .kicker,.meta-row,.pill{color:#333 !important;background:none;border:0;padding:0;margin:0 0 4px}
+  .pill{display:inline;margin-inline-end:10px;font-size:8pt}
+  .wrap{padding:0;max-width:100%}
+  main{padding:0;gap:6px;display:block}
+  .layout-top{display:block}
+  .card{
+    box-shadow:none;border:0;border-radius:0;padding:4px 0;background:transparent;break-inside:avoid;
+  }
+  .card h2{font-size:11pt;margin:0 0 6px;color:#0f3049}
+  .settings{
+    display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin:0 0 6px;
+    border:1px solid #bbb;padding:6px;border-radius:0;
+  }
+  .settings label span{font-size:7.5pt;color:#444}
+  .settings input,.settings select{
+    border:1px solid #999;background:#fff;padding:3px 5px;border-radius:0;font-size:8.5pt;
+  }
+  .table-card{padding:0}
+  .table-wrap{
+    overflow:visible;border:1px solid #333;border-radius:0;max-height:none;
+    box-shadow:none;
+  }
+  table.lines{
+    min-width:0 !important;width:100% !important;font-size:7.2pt;
+    table-layout:fixed;
+  }
+  table.lines thead th{
+    background:#0f3049 !important;color:#fff !important;
+    position:static;padding:5px 3px;font-size:6.5pt;
+    border:1px solid #0a2436;border-bottom:1.5pt solid #b0842e;
+  }
+  table.lines tbody td{
+    padding:4px 3px;border:1px solid #ccc !important;
+    background:#fff !important;vertical-align:top;
+  }
+  table.lines tbody tr:nth-child(even) td{background:#f5f7fa !important}
+  table.lines td.col-limits{background:#f8f1dc !important}
+  table.lines td.col-result{background:#eef6f1 !important}
+  table.lines td.col-new{background:#e4f2eb !important}
+  table.lines td.col-input input{
+    border:0 !important;background:transparent !important;padding:0;
+    font-size:7.2pt;max-width:none;box-shadow:none;appearance:textfield;
+  }
+  table.lines td.td-start{min-width:0;max-width:none}
+  .item-desc{-webkit-line-clamp:2;font-size:6.5pt}
+  .item-name{font-size:7.5pt}
+  .new-price{border:1px solid #2a7a55;padding:2px 4px;font-size:7.5pt;background:#fff}
+  .price-hint{display:none}
+  .codes .tag{font-size:6pt;padding:0 3px}
+  .summary{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:8px}
+  .sum-box{border:1px solid #999;border-radius:0;padding:6px 8px;background:#f7f7f7}
+  .sum-box.grand{grid-column:auto;background:#0f3049 !important;color:#fff !important;border-color:#0f3049}
+  .sum-box .lbl{font-size:7pt}
+  .sum-box .val{font-size:10pt}
+  .print-head{
+    display:flex;justify-content:space-between;align-items:flex-end;gap:12px;
+    margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid #999;
+  }
+  .print-head h1{margin:0;font-size:14pt;color:#0f3049}
+  .print-meta{font-size:8pt;color:#333;text-align:start;line-height:1.5}
+  .print-foot{
+    margin-top:8px;font-size:7pt;color:#555;display:flex;justify-content:space-between;gap:10px;
+  }
+  /* hide delete column on print */
+  table.lines th:last-child,
+  table.lines td:last-child{display:none}
+}
+</style>
+</head>
+<body>
+<div class="topbar no-print">
+  <div class="topbar-inner">
+    <div class="brand">
+      حاسبة التعرفة الجمركية
+      <small>عرض كامل · طباعة A4 أفقية</small>
+    </div>
+    <div class="top-actions">
+      <button type="button" class="btn ghost" id="clearAll">تفريغ القائمة</button>
+      <button type="button" class="btn print" id="printBtn">طباعة A4</button>
+    </div>
+  </div>
+</div>
+
+<div class="print-only print-head">
+  <div>
+    <h1>كشف احتساب التعرفة الجمركية</h1>
+    <div style="font-size:9pt;color:#555;margin-top:2px">عمليات الشراء والاستيراد — تقدير رسوم الاستيراد</div>
+  </div>
+  <div class="print-meta">
+    <div>التاريخ: <span id="printDate">—</span></div>
+    <div>سعر الصرف: <span id="printFx">1320</span> د.ع / $</div>
+    <div>عدد المواد: <span id="printCount">0</span></div>
+  </div>
+</div>
+
+<header class="hero no-print">
+  <div class="wrap">
+    <div class="hero-grid">
+      <div>
+        <p class="kicker">عمليات الشراء والاستيراد · الكمارك العراقية</p>
+        <h1>حاسبة التعرفة لعدة مواد + سعر الوحدة بعد الرسوم</h1>
+        <p>
+          أضف المواد، حدّد الكمية والسعر، تُحسب الرسوم لكل بند ثم تُحوَّل بسعر الصرف وتُضاف على الفاتورة
+          لاستخراج سعر الوحدة الجديد. الصفحة تستخدم عرض المتصفح بالكامل، والطباعة على ورق A4 أفقي.
+        </p>
+        <div class="meta-row">
+          <span class="pill" id="metaTariff">تعرفة: —</span>
+          <span class="pill" id="metaVals">قيم مرجعية: —</span>
+          <span class="pill">الرسوم ($) × الصرف → دينار</span>
+        </div>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat"><div class="lbl">إجمالي الفاتورة + الرسوم</div><div class="val" id="heroGrand">0 د.ع</div></div>
+        <div class="hero-stat"><div class="lbl">عدد المواد في القائمة</div><div class="val" id="heroCount">0</div></div>
+        <div class="hero-stat"><div class="lbl">إجمالي الرسوم</div><div class="val" id="heroFees">0 د.ع</div></div>
+        <div class="hero-stat"><div class="lbl">سعر الصرف</div><div class="val" id="heroFx">1,320</div></div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="layout-top no-print">
+    <section class="card">
+      <h2>1) إضافة المواد والإعدادات</h2>
+      <p class="sub">ابحث ثم أضف إلى القائمة. يمكن تكرار الإضافة لأي عدد من البنود.</p>
+
+      <div class="toolbar">
+        <label class="field search-box">
+          <span>بحث المادة</span>
+          <input id="q" type="search" placeholder="بند / وصف / عنوان / TSC / موديل" autocomplete="off">
+          <div id="results" role="listbox"></div>
+        </label>
+        <label class="field">
+          <span>كمية افتراضية</span>
+          <input id="defaultQty" class="num" type="number" min="0" step="any" value="1">
+        </label>
+        <label class="field">
+          <span>سعر وحدة افتراضي (USD)</span>
+          <input id="defaultPrice" class="num" type="number" min="0" step="any" placeholder="من الحد الأدنى">
+        </label>
+        <button type="button" class="btn" id="addBtn" disabled>إضافة</button>
+      </div>
+
+      <div class="settings">
+        <label class="field">
+          <span>سعر الصرف (دينار / دولار)</span>
+          <input id="fx" class="num" type="number" min="0" step="any" value="1320">
+        </label>
+        <label class="field">
+          <span>إعادة إعمار %</span>
+          <input id="reconPct" class="num" type="number" min="0" max="100" step="any" value="5">
+        </label>
+        <label class="field">
+          <span>أساس القيمة الكمركية</span>
+          <select id="basis">
+            <option value="higher">الأعلى بين الفاتورة والحد الأدنى</option>
+            <option value="invoice">سعر الفاتورة فقط</option>
+            <option value="min">الحد الأدنى الرسمي</option>
+            <option value="max">الحد الأعلى الرسمي</option>
+            <option value="avg">متوسط الحدّين</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>ما يشمله «الرسوم»</span>
+          <select id="feeScope">
+            <option value="all">كمركي + تأمينات + إعمار</option>
+            <option value="duty_recon">كمركي + إعمار فقط</option>
+            <option value="duty">الكمركي فقط</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="formula">
+        <strong>سعر الوحدة الجديد (د.ع)</strong> =
+        (قيمة الفاتورة بالدينار + الرسوم بالدولار × سعر الصرف) ÷ الكمية
+      </div>
+    </section>
+
+    <aside class="card">
+      <h2>الإجماليات</h2>
+      <p class="sub">تتحدّث فوراً مع كل تعديل.</p>
+      <div class="summary">
+        <div class="sum-box">
+          <div class="lbl">قيمة الفاتورة (USD)</div>
+          <div class="val" id="sInvUsd">0.00 $</div>
+        </div>
+        <div class="sum-box">
+          <div class="lbl">الرسوم (USD)</div>
+          <div class="val" id="sFeesUsd">0.00 $</div>
+        </div>
+        <div class="sum-box">
+          <div class="lbl">الرسوم بعد الصرف</div>
+          <div class="val" id="sFeesIqd">0 د.ع</div>
+        </div>
+        <div class="sum-box grand">
+          <div class="lbl">الإجمالي النهائي (د.ع)</div>
+          <div class="val" id="sGrand">0 د.ع</div>
+        </div>
+      </div>
+      <p class="note">تقدير إرشادي — التخمين النهائي يعتمد على الأسيكودا والمستندات.</p>
+    </aside>
+  </div>
+
+  <!-- print settings strip -->
+  <section class="card print-only">
+    <div class="settings">
+      <label class="field"><span>سعر الصرف</span><div id="printFx2">1320</div></label>
+      <label class="field"><span>إعادة إعمار %</span><div id="printRecon">5</div></label>
+      <label class="field"><span>أساس القيمة</span><div id="printBasis">—</div></label>
+      <label class="field"><span>نطاق الرسوم</span><div id="printScope">—</div></label>
+    </div>
+  </section>
+
+  <section class="card table-card">
+    <div class="card-head">
+      <div>
+        <h2>2) قائمة المواد والاحتساب التفصيلي</h2>
+        <p class="sub" id="lineCount">لا توجد مواد بعد.</p>
+      </div>
+      <div class="legend-limits no-print">
+        <span><i class="legend-swatch lim"></i> الحدود الرسمية</span>
+        <span><i class="legend-swatch res"></i> نتائج الاحتساب</span>
+        <span><i class="legend-swatch nw"></i> سعر الوحدة الجديد</span>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table class="lines">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th class="th-start">المادة</th>
+            <th>الحد الأدنى<span class="th-sub">USD</span></th>
+            <th>الحد الأعلى<span class="th-sub">USD</span></th>
+            <th>الكمية</th>
+            <th>سعر الوحدة<span class="th-sub">USD</span></th>
+            <th>تعرفة %</th>
+            <th>تأمين %</th>
+            <th>القيمة الكمركية<span class="th-sub">USD</span></th>
+            <th>الرسوم<span class="th-sub">USD</span></th>
+            <th>الرسوم<span class="th-sub">د.ع</span></th>
+            <th>قيمة الفاتورة<span class="th-sub">د.ع</span></th>
+            <th>سعر الوحدة الجديد<span class="th-sub">د.ع</span></th>
+            <th class="no-print"></th>
+          </tr>
+        </thead>
+        <tbody id="tbody">
+          <tr><td colspan="14" class="empty">أضف مادة من البحث أعلاه</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- print summary -->
+  <section class="card print-only">
+    <div class="summary">
+      <div class="sum-box"><div class="lbl">قيمة الفاتورة (USD)</div><div class="val" id="pInvUsd">0</div></div>
+      <div class="sum-box"><div class="lbl">الرسوم (USD)</div><div class="val" id="pFeesUsd">0</div></div>
+      <div class="sum-box"><div class="lbl">الرسوم (د.ع)</div><div class="val" id="pFeesIqd">0</div></div>
+      <div class="sum-box grand"><div class="lbl">الإجمالي (د.ع)</div><div class="val" id="pGrand">0</div></div>
+    </div>
+    <div class="print-foot">
+      <span>مستند تقديري — لا يُعد بديلاً عن البيان الكمركي الرسمي</span>
+      <span>A4 Landscape</span>
+    </div>
+  </section>
+</main>
+
+<script src="tariff-data.js"></script>
+<script>
+(function () {
+  const data = window.TARIFF_DATA;
+  if (!data) {
+    document.body.insertAdjacentHTML('afterbegin',
+      '<div style="padding:20px;background:#fbe8e5;color:#8e2a20">تعذّر تحميل tariff-data.js</div>');
+    return;
+  }
+
+  const COL = { hs:0, tsc:1, desc:2, title:3, min:4, max:5, unit:6, model:7, origin:8 };
+  const catalog = data.items || [];
+  const tariff = data.tariff || {};
+  const lines = [];
+  let pending = null;
+  let searchTimer = null;
+  let uid = 1;
+
+  document.getElementById('metaTariff').textContent =
+    'تعرفة: ' + (data.meta?.tariffCount || Object.keys(tariff).length).toLocaleString('en-US') + ' بند';
+  document.getElementById('metaVals').textContent =
+    'قيم مرجعية: ' + (data.meta?.valuationCount || catalog.length).toLocaleString('en-US') + ' مادة';
+
+  const el = (id) => document.getElementById(id);
+  const q = el('q');
+  const results = el('results');
+  const addBtn = el('addBtn');
+
+  function num(v) {
+    const n = parseFloat(v);
+    return Number.isFinite(n) ? n : 0;
+  }
+  function escapeHtml(s) {
+    return String(s ?? '')
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+  function norm(s) {
+    return String(s || '').toLowerCase()
+      .replace(/[أإآ]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي')
+      .replace(/\s+/g, ' ').trim();
+  }
+  function fmtUsd(n) {
+    return n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' $';
+  }
+  function fmtIqd(n) {
+    return Math.round(n).toLocaleString('en-US') + ' د.ع';
+  }
+  function fmtLimit(n) {
+    if (n == null || Number.isNaN(n)) return '—';
+    return Number(n).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 4 });
+  }
+  function priceStatus(line) {
+    if (line.min != null && line.price > 0 && line.price < line.min) {
+      return { cls: 'below-min', hint: 'أقل من الحد الأدنى', hintCls: 'low' };
+    }
+    if (line.max != null && line.price > line.max) {
+      return { cls: 'above-max', hint: 'أعلى من الحد الأعلى', hintCls: 'high' };
+    }
+    return { cls: '', hint: '', hintCls: '' };
+  }
+  function rateFor(hs) {
+    const r = tariff[hs];
+    if (!r) return { duty: 0, insur: 0, prohibited: false, found: false };
+    return { duty: r[0] || 0, insur: r[1] || 0, prohibited: !!r[2], found: true };
+  }
+  function rowObj(row) {
+    return {
+      hs: row[COL.hs], tsc: row[COL.tsc], desc: row[COL.desc], title: row[COL.title],
+      min: row[COL.min], max: row[COL.max], unit: row[COL.unit],
+      model: row[COL.model], origin: row[COL.origin],
+    };
+  }
+
+  function search(query) {
+    const nq = norm(query);
+    if (!nq || nq.length < 2) return [];
+    const digits = nq.replace(/\D/g, '');
+    const out = [];
+    for (let i = 0; i < catalog.length; i++) {
+      const r = catalog[i];
+      const hs = r[COL.hs];
+      const blob = norm([hs, r[COL.tsc], r[COL.desc], r[COL.title], r[COL.model], r[COL.origin]].join(' '));
+      let score = 0;
+      if (digits && hs.startsWith(digits)) score += 50;
+      else if (digits && hs.includes(digits)) score += 20;
+      if (blob.includes(nq)) score += 10;
+      if (norm(r[COL.title]).includes(nq)) score += 8;
+      if (norm(r[COL.tsc]) === nq) score += 30;
+      if (score > 0) out.push({ score, row: r });
+      if (out.length > 400) break;
+    }
+    out.sort((a, b) => b.score - a.score);
+    return out.slice(0, 50).map((x) => rowObj(x.row));
+  }
+
+  function renderResults(list) {
+    if (!list.length) { results.classList.remove('open'); results.innerHTML = ''; return; }
+    results.innerHTML = list.map((it, idx) => {
+      const rate = rateFor(it.hs);
+      return `<button type="button" class="result" data-idx="${idx}">
+        <div class="t">${escapeHtml(it.title || it.desc || 'بدون عنوان')}</div>
+        <div class="d">${escapeHtml(it.desc || '')}</div>
+        <div class="codes">
+          <span class="tag en">${escapeHtml(it.hs)}</span>
+          ${it.tsc ? `<span class="tag en">${escapeHtml(it.tsc)}</span>` : ''}
+          <span class="tag">${rate.found ? rate.duty + '%' : 'بدون تعرفة'}</span>
+          ${it.min != null ? `<span class="tag">حد ${fmtLimit(it.min)}–${fmtLimit(it.max)}</span>` : ''}
+        </div>
+      </button>`;
+    }).join('');
+    results.classList.add('open');
+    results.querySelectorAll('.result').forEach((btn) => {
+      btn.addEventListener('click', () => pickPending(list[+btn.dataset.idx]));
+    });
+  }
+
+  function pickPending(it) {
+    pending = it;
+    results.classList.remove('open');
+    q.value = it.hs + (it.title ? ' — ' + it.title : '');
+    if (it.min != null && !el('defaultPrice').value) el('defaultPrice').value = it.min;
+    addBtn.disabled = false;
+  }
+
+  function customsUnit(line) {
+    const inv = line.price;
+    const mn = line.min;
+    const mx = line.max;
+    const mode = el('basis').value;
+    if (mode === 'invoice') return inv;
+    if (mode === 'min') return mn != null ? mn : inv;
+    if (mode === 'max') return mx != null ? mx : inv;
+    if (mode === 'avg') {
+      if (mn != null && mx != null) return (mn + mx) / 2;
+      return mn != null ? mn : (mx != null ? mx : inv);
+    }
+    if (mn == null) return inv;
+    return Math.max(inv || 0, mn);
+  }
+
+  function feeUsd(line, customsValue) {
+    const duty = customsValue * line.dutyPct / 100;
+    const insur = customsValue * line.insurPct / 100;
+    const recon = customsValue * num(el('reconPct').value) / 100;
+    const scope = el('feeScope').value;
+    if (scope === 'duty') return duty;
+    if (scope === 'duty_recon') return duty + recon;
+    return duty + insur + recon;
+  }
+
+  function calcLine(line) {
+    const qty = line.qty;
+    const price = line.price;
+    const fx = num(el('fx').value) || 1320;
+    const cUnit = customsUnit(line);
+    const customsValue = cUnit * qty;
+    const feesUsd = feeUsd(line, customsValue);
+    const feesIqd = feesUsd * fx;
+    const invoiceUsd = qty * price;
+    const invoiceIqd = invoiceUsd * fx;
+    const totalIqd = invoiceIqd + feesIqd;
+    const newUnit = qty > 0 ? totalIqd / qty : 0;
+    return { customsValue, feesUsd, feesIqd, invoiceUsd, invoiceIqd, totalIqd, newUnit };
+  }
+
+  function addLine(it, qty, price) {
+    const rate = rateFor(it.hs);
+    lines.push({
+      id: uid++,
+      hs: it.hs, tsc: it.tsc || '', title: it.title || '', desc: it.desc || '',
+      unit: it.unit || '', min: it.min, max: it.max, qty, price,
+      dutyPct: rate.found ? rate.duty : 0,
+      insurPct: rate.found ? rate.insur : 0,
+      prohibited: rate.prohibited,
+      rateFound: rate.found,
+    });
+    pending = null;
+    addBtn.disabled = true;
+    q.value = '';
+    el('defaultPrice').value = '';
+    render();
+  }
+
+  function updateSummary(calcs) {
+    const invUsd = calcs.reduce((s, c) => s + c.invoiceUsd, 0);
+    const feesUsd = calcs.reduce((s, c) => s + c.feesUsd, 0);
+    const feesIqd = calcs.reduce((s, c) => s + c.feesIqd, 0);
+    const grand = calcs.reduce((s, c) => s + c.totalIqd, 0);
+    const fx = num(el('fx').value) || 1320;
+
+    el('sInvUsd').textContent = fmtUsd(invUsd);
+    el('sFeesUsd').textContent = fmtUsd(feesUsd);
+    el('sFeesIqd').textContent = fmtIqd(feesIqd);
+    el('sGrand').textContent = fmtIqd(grand);
+
+    el('heroGrand').textContent = fmtIqd(grand);
+    el('heroFees').textContent = fmtIqd(feesIqd);
+    el('heroCount').textContent = String(lines.length);
+    el('heroFx').textContent = fx.toLocaleString('en-US');
+
+    el('pInvUsd').textContent = fmtUsd(invUsd);
+    el('pFeesUsd').textContent = fmtUsd(feesUsd);
+    el('pFeesIqd').textContent = fmtIqd(feesIqd);
+    el('pGrand').textContent = fmtIqd(grand);
+    el('printCount').textContent = String(lines.length);
+    el('printFx').textContent = fx.toLocaleString('en-US');
+    el('printFx2').textContent = fx.toLocaleString('en-US');
+    el('printRecon').textContent = el('reconPct').value;
+    el('printBasis').textContent = el('basis').selectedOptions[0]?.text || '—';
+    el('printScope').textContent = el('feeScope').selectedOptions[0]?.text || '—';
+  }
+
+  function patchRow(tr, c, line) {
+    const cells = tr.children;
+    cells[8].textContent = fmtUsd(c.customsValue);
+    cells[9].textContent = fmtUsd(c.feesUsd);
+    cells[10].textContent = fmtIqd(c.feesIqd);
+    cells[11].textContent = fmtIqd(c.invoiceIqd);
+    cells[12].innerHTML = `<span class="new-price money">${fmtIqd(c.newUnit)}</span>`;
+    if (line) {
+      const st = priceStatus(line);
+      const priceInp = cells[5].querySelector('input');
+      const hint = cells[5].querySelector('.price-hint');
+      if (priceInp) {
+        priceInp.classList.remove('below-min', 'above-max');
+        if (st.cls) priceInp.classList.add(st.cls);
+      }
+      if (hint) {
+        hint.textContent = st.hint;
+        hint.className = 'price-hint ' + st.hintCls;
+      }
+    }
+  }
+
+  function refreshComputed() {
+    const calcs = lines.map(calcLine);
+    el('tbody').querySelectorAll('tr[data-id]').forEach((tr, i) => {
+      if (calcs[i]) patchRow(tr, calcs[i], lines[i]);
+    });
+    updateSummary(calcs);
+  }
+
+  function render() {
+    el('lineCount').textContent = lines.length
+      ? (lines.length + ' مادة — عدّل الكمية والسعر والنسب في الجدول')
+      : 'لا توجد مواد بعد.';
+
+    const tbody = el('tbody');
+    if (!lines.length) {
+      tbody.innerHTML = '<tr><td colspan="14" class="empty">أضف مادة من البحث أعلاه</td></tr>';
+      updateSummary([]);
+      return;
+    }
+
+    const calcs = lines.map(calcLine);
+    tbody.innerHTML = lines.map((line, i) => {
+      const c = calcs[i];
+      const st = priceStatus(line);
+      const warn = (!line.rateFound ? 'لا توجد تعرفة — عدّل النسبة يدوياً' : '')
+        || (line.prohibited ? 'بند مقيّد/محظور' : '');
+      return `<tr data-id="${line.id}">
+        <td class="col-idx">${i + 1}</td>
+        <td class="td-start">
+          <div class="item-name">${escapeHtml(line.title || line.desc || line.hs)}</div>
+          <div class="item-desc">${escapeHtml(line.desc || '')}</div>
+          <div class="codes" style="margin-top:5px">
+            <span class="tag en">${escapeHtml(line.hs)}</span>
+            ${line.tsc ? `<span class="tag en">${escapeHtml(line.tsc)}</span>` : ''}
+            ${line.unit ? `<span class="tag">${escapeHtml(line.unit)}</span>` : ''}
+          </div>
+          ${warn ? `<div class="badge-warn">${escapeHtml(warn)}</div>` : ''}
+        </td>
+        <td class="col-limits"><div class="limit-box"><span class="limit-lbl">أدنى</span><span class="limit-val ${line.min == null ? 'muted' : ''}">${fmtLimit(line.min)}</span></div></td>
+        <td class="col-limits"><div class="limit-box"><span class="limit-lbl">أعلى</span><span class="limit-val ${line.max == null ? 'muted' : ''}">${fmtLimit(line.max)}</span></div></td>
+        <td class="col-input"><input class="num" data-f="qty" type="number" min="0" step="any" value="${line.qty}"></td>
+        <td class="col-input col-price">
+          <input class="num ${st.cls}" data-f="price" type="number" min="0" step="any" value="${line.price}">
+          <div class="price-hint ${st.hintCls}">${escapeHtml(st.hint)}</div>
+        </td>
+        <td class="col-input"><input class="num" data-f="dutyPct" type="number" min="0" max="100" step="any" value="${line.dutyPct}"></td>
+        <td class="col-input"><input class="num" data-f="insurPct" type="number" min="0" max="100" step="any" value="${line.insurPct}"></td>
+        <td class="money col-result">${fmtUsd(c.customsValue)}</td>
+        <td class="money col-result">${fmtUsd(c.feesUsd)}</td>
+        <td class="money col-result">${fmtIqd(c.feesIqd)}</td>
+        <td class="money col-result">${fmtIqd(c.invoiceIqd)}</td>
+        <td class="col-new"><span class="new-price money">${fmtIqd(c.newUnit)}</span></td>
+        <td class="no-print"><button type="button" class="btn sm danger" data-del="${line.id}">حذف</button></td>
+      </tr>`;
+    }).join('');
+
+    tbody.querySelectorAll('input[data-f]').forEach((inp) => {
+      inp.addEventListener('input', () => {
+        const line = lines.find((l) => l.id === +inp.closest('tr').dataset.id);
+        if (!line) return;
+        line[inp.dataset.f] = num(inp.value);
+        refreshComputed();
+      });
+    });
+
+    tbody.querySelectorAll('[data-del]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const idx = lines.findIndex((l) => l.id === +btn.getAttribute('data-del'));
+        if (idx >= 0) lines.splice(idx, 1);
+        render();
+      });
+    });
+
+    updateSummary(calcs);
+  }
+
+  function preparePrint() {
+    const now = new Date();
+    el('printDate').textContent = now.toLocaleString('ar-IQ', {
+      year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
+    });
+    refreshComputed();
+  }
+
+  q.addEventListener('input', () => {
+    clearTimeout(searchTimer);
+    pending = null;
+    addBtn.disabled = true;
+    searchTimer = setTimeout(() => renderResults(search(q.value)), 160);
+  });
+  q.addEventListener('focus', () => {
+    if (q.value.trim().length >= 2) renderResults(search(q.value));
+  });
+  document.addEventListener('click', (e) => {
+    if (!results.contains(e.target) && e.target !== q) results.classList.remove('open');
+  });
+  q.addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter') return;
+    e.preventDefault();
+    const list = search(q.value);
+    if (list.length) pickPending(list[0]);
+  });
+
+  addBtn.addEventListener('click', () => {
+    if (!pending) return;
+    const qty = num(el('defaultQty').value) || 1;
+    let price = num(el('defaultPrice').value);
+    if (!price && pending.min != null) price = pending.min;
+    addLine(pending, qty, price);
+  });
+
+  el('clearAll').addEventListener('click', () => {
+    lines.length = 0;
+    render();
+  });
+
+  el('printBtn').addEventListener('click', () => {
+    preparePrint();
+    window.print();
+  });
+  window.addEventListener('beforeprint', preparePrint);
+
+  ['fx', 'reconPct', 'basis', 'feeScope'].forEach((id) => {
+    el(id).addEventListener('input', refreshComputed);
+    el(id).addEventListener('change', refreshComputed);
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
