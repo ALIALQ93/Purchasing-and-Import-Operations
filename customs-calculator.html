@@ -92,6 +92,7 @@ input,select{
   border-radius:10px;padding:10px 11px;font:inherit;outline:none;
 }
 input:focus,select:focus{border-color:var(--brass);box-shadow:0 0 0 3px rgba(176,132,46,.18);background:#fff}
+input:disabled,select:disabled{background:#e7eef4;color:var(--ink-soft);cursor:not-allowed}
 input.num{font-family:"IBM Plex Sans";font-feature-settings:"tnum" 1}
 .toolbar{display:grid;grid-template-columns:minmax(280px,1.6fr) .55fr .7fr auto;gap:10px;align-items:end}
 @media (max-width:900px){.toolbar{grid-template-columns:1fr 1fr}}
@@ -130,6 +131,33 @@ input.num{font-family:"IBM Plex Sans";font-feature-settings:"tnum" 1}
   margin-top:12px;padding:11px 13px;border-radius:10px;background:var(--amber-bg);
   border:1px solid rgba(191,135,28,.25);font-size:.82rem;
 }
+.exp-presets{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px}
+.exp-list{display:flex;flex-direction:column;gap:8px}
+.exp-empty{
+  padding:16px;text-align:center;color:var(--ink-soft);font-size:.86rem;
+  background:var(--surface-2);border:1px dashed var(--line);border-radius:12px;
+}
+.exp-row{
+  display:grid;width:100%;
+  grid-template-columns:minmax(0,1.5fr) minmax(0,.7fr) minmax(0,.95fr) minmax(0,.85fr) minmax(0,.8fr) auto;
+  gap:8px;align-items:end;
+  background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:10px;
+}
+.exp-row > *{min-width:0}
+@media (max-width:900px){.exp-row{grid-template-columns:1fr 1fr}}
+.exp-iqd .lbl{display:block;font-size:.78rem;font-weight:600;margin-bottom:5px;color:var(--ink-soft)}
+.exp-iqd .val{
+  font-family:"IBM Plex Sans";font-feature-settings:"tnum" 1;font-weight:700;
+  background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 8px;text-align:center;
+}
+.exp-iqd .meta{font-size:.7rem;color:var(--ink-soft);margin-top:3px;text-align:center}
+.exp-total{
+  display:flex;justify-content:space-between;align-items:center;gap:10px;
+  margin-top:10px;padding:10px 12px;border-radius:10px;background:var(--green-bg);
+  border:1px solid rgba(28,133,90,.22);font-weight:600;
+}
+.exp-total .val{font-family:"IBM Plex Sans";font-feature-settings:"tnum" 1;font-size:1.05rem}
+.exp-code{margin-top:6px}
 .summary{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .sum-box{
   background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:13px 14px;
@@ -154,6 +182,10 @@ input.num{font-family:"IBM Plex Sans";font-feature-settings:"tnum" 1}
 .legend-swatch.lim{background:#e8d59a;border:1px solid #c4a45a}
 .legend-swatch.res{background:#cfe8db;border:1px solid #7fb89a}
 .legend-swatch.nw{background:#b7dfcb;border:1px solid #4fa87e}
+.legend-swatch.exp{background:#f3e6c4;border:1px solid #c4a45a}
+table.lines td.col-exp{background:#fbf6ea !important}
+table.lines tr:nth-child(even) td.col-exp{background:#f7efd9 !important}
+table.lines tr:hover td.col-exp{background:#f3e6c4 !important}
 
 /* table — full browser width */
 .table-card{padding:16px 12px 18px}
@@ -220,92 +252,96 @@ table.lines td.col-new{background:#e8f5ef !important}
 .price-hint.high{color:#9a6c10}
 .empty{padding:40px;text-align:center;color:var(--ink-soft);background:#fafbfc}
 
+.stat-table{width:100%;border-collapse:collapse;font-size:.86rem}
+.stat-table th,.stat-table td{padding:9px 8px;border-bottom:1px solid var(--line);text-align:center}
+.stat-table th{font-size:.74rem;color:var(--ink-soft);font-weight:600}
+.stat-table td:first-child,.stat-table th:first-child{text-align:start;font-weight:600}
+.stat-table td.num{font-family:"IBM Plex Sans";font-feature-settings:"tnum" 1;font-weight:700}
+.stat-table tr.grand td{background:linear-gradient(158deg,var(--navy),var(--navy-2));color:#fff;border:0}
+.lib{
+  position:fixed;inset:0;z-index:80;background:rgba(15,48,73,.45);
+  display:flex;align-items:flex-start;justify-content:center;padding:28px 16px;
+}
+.lib[hidden]{display:none !important}
+.lib-card{
+  width:min(560px,100%);max-height:min(82vh,680px);overflow:auto;
+  background:#fff;border-radius:16px;padding:18px 20px;
+  box-shadow:0 18px 50px rgba(16,48,73,.22);
+}
+.lib-head{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.lib-head h2{margin:0}
+.save-row{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end;margin:12px 0}
+.save-item{
+  display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;
+  padding:10px 0;border-bottom:1px solid var(--line);
+}
+.save-item b{display:block}
+.save-item .meta{font-size:.75rem;color:var(--ink-soft)}
+.lib-note{font-size:.78rem;color:var(--ink-soft);margin:10px 0 0}
+.lib-empty{padding:16px;text-align:center;color:var(--ink-soft);background:var(--surface-2);border-radius:12px}
 .print-only{display:none}
 
-/* ========== A4 PRINT ========== */
+/* ========== A4 PRINT SHEET ========== */
+.print-sheet{display:none}
 @media print{
-  @page{
-    size: A4 landscape;
-    margin: 8mm 7mm;
-  }
+  @page{size:A4 landscape;margin:9mm 8mm}
   html,body{
-    background:#fff !important;color:#000 !important;
+    background:#fff !important;color:#12283d !important;
     -webkit-print-color-adjust:exact;print-color-adjust:exact;
   }
-  .no-print,.topbar,#results,.search-box,.toolbar,.formula,
-  .legend-limits,.actions,.btn,.note,.hero-stats,.card .sub{display:none !important}
-  .print-only{display:block !important}
-  header.hero{
-    background:#fff !important;color:#000 !important;padding:0 0 6px;border-bottom:2px solid #0f3049;
+  .no-print,.screen-only,.topbar,header.hero{display:none !important}
+  .print-sheet{display:block !important}
+  .print-sheet{font-size:8pt;color:#12283d}
+  .doc-banner{
+    display:flex;justify-content:space-between;align-items:flex-end;gap:8mm;
+    border-bottom:2.4pt solid #0f3049;padding-bottom:2.5mm;margin-bottom:3mm;
   }
-  header.hero::after{display:none}
-  header h1{font-size:16pt;color:#0f3049}
-  .kicker,.meta-row,.pill{color:#333 !important;background:none;border:0;padding:0;margin:0 0 4px}
-  .pill{display:inline;margin-inline-end:10px;font-size:8pt}
-  .wrap{padding:0;max-width:100%}
-  main{padding:0;gap:6px;display:block}
-  .layout-top{display:block}
-  .card{
-    box-shadow:none;border:0;border-radius:0;padding:4px 0;background:transparent;break-inside:avoid;
+  .doc-kicker{margin:0 0 1mm;color:#b0842e;font-weight:700;font-size:8pt}
+  .doc-banner h1{margin:0;font-size:15pt;line-height:1.25;color:#0f3049}
+  .doc-sub{margin:1mm 0 0;color:#5a6b7b;font-size:8pt}
+  .doc-section{margin-top:3.2mm}
+  .doc-section h2{
+    margin:0 0 1.4mm;font-size:9.5pt;color:#0f3049;
+    border-inline-start:2.4pt solid #b0842e;padding-inline-start:2mm;
   }
-  .card h2{font-size:11pt;margin:0 0 6px;color:#0f3049}
-  .settings{
-    display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin:0 0 6px;
-    border:1px solid #bbb;padding:6px;border-radius:0;
+  #printExpBlock.is-empty{display:none !important}
+  table.doc{
+    width:100%;border-collapse:collapse;table-layout:fixed;
+    font-size:7.5pt;line-height:1.3;
   }
-  .settings label span{font-size:7.5pt;color:#444}
-  .settings input,.settings select{
-    border:1px solid #999;background:#fff;padding:3px 5px;border-radius:0;font-size:8.5pt;
+  table.doc thead{display:table-header-group}
+  table.doc th{
+    background:#0f3049;color:#fff;font-weight:600;text-align:center;
+    padding:1.5mm 0.8mm;border:0.35pt solid #0a2436;vertical-align:middle;
   }
-  .table-card{padding:0}
-  .table-wrap{
-    overflow:visible;border:1px solid #333;border-radius:0;max-height:none;
-    box-shadow:none;
+  table.doc th .u{display:block;font-weight:400;opacity:.75;font-size:6.4pt;margin-top:.4mm}
+  table.doc.meta td{font-size:8pt;font-weight:700}
+  table.doc td{
+    border:0.35pt solid #c5d0dc;padding:1.3mm 0.8mm;
+    text-align:center;vertical-align:middle;background:#fff;
+    overflow:hidden;
   }
-  table.lines{
-    min-width:0 !important;width:100% !important;font-size:7.2pt;
-    table-layout:fixed;
+  table.doc tbody tr{break-inside:avoid;page-break-inside:avoid}
+  table.doc tbody tr:nth-child(even) td{background:#f4f7fa}
+  table.doc td.c-name,.doc-section h2{text-align:right}
+  table.doc tfoot td.c-name{text-align:right;padding-inline:2mm}
+  table.doc.is-empty tfoot{display:none}
+  table.doc td.num{
+    font-family:"IBM Plex Sans",sans-serif;font-variant-numeric:tabular-nums;
+    direction:ltr;unicode-bidi:isolate;text-align:center;white-space:nowrap;
   }
-  table.lines thead th{
-    background:#0f3049 !important;color:#fff !important;
-    position:static;padding:5px 3px;font-size:6.5pt;
-    border:1px solid #0a2436;border-bottom:1.5pt solid #b0842e;
+  table.doc tfoot td{font-weight:700;background:#eef3f8 !important;border-top:1pt solid #0f3049}
+  table.doc td.emph{font-weight:700;background:#e7f4ee !important}
+  table.doc th.grand,table.doc td.grand{background:#0f3049 !important;color:#fff !important}
+  .pn{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .pm{margin-top:.3mm;color:#5a6b7b;font-size:6.5pt;font-family:"IBM Plex Sans",sans-serif;direction:ltr;unicode-bidi:isolate;text-align:start}
+  .doc-empty{padding:4mm;color:#5a6b7b;text-align:center}
+  .doc-foot{
+    margin-top:3mm;padding-top:1.6mm;border-top:0.6pt solid #d5dee8;
+    display:flex;justify-content:space-between;gap:6mm;
+    font-size:7pt;color:#5a6b7b;
   }
-  table.lines tbody td{
-    padding:4px 3px;border:1px solid #ccc !important;
-    background:#fff !important;vertical-align:top;
-  }
-  table.lines tbody tr:nth-child(even) td{background:#f5f7fa !important}
-  table.lines td.col-limits{background:#f8f1dc !important}
-  table.lines td.col-result{background:#eef6f1 !important}
-  table.lines td.col-new{background:#e4f2eb !important}
-  table.lines td.col-input input{
-    border:0 !important;background:transparent !important;padding:0;
-    font-size:7.2pt;max-width:none;box-shadow:none;appearance:textfield;
-  }
-  table.lines td.td-start{min-width:0;max-width:none}
-  .item-desc{-webkit-line-clamp:2;font-size:6.5pt}
-  .item-name{font-size:7.5pt}
-  .new-price{border:1px solid #2a7a55;padding:2px 4px;font-size:7.5pt;background:#fff}
-  .price-hint{display:none}
-  .codes .tag{font-size:6pt;padding:0 3px}
-  .summary{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:8px}
-  .sum-box{border:1px solid #999;border-radius:0;padding:6px 8px;background:#f7f7f7}
-  .sum-box.grand{grid-column:auto;background:#0f3049 !important;color:#fff !important;border-color:#0f3049}
-  .sum-box .lbl{font-size:7pt}
-  .sum-box .val{font-size:10pt}
-  .print-head{
-    display:flex;justify-content:space-between;align-items:flex-end;gap:12px;
-    margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid #999;
-  }
-  .print-head h1{margin:0;font-size:14pt;color:#0f3049}
-  .print-meta{font-size:8pt;color:#333;text-align:start;line-height:1.5}
-  .print-foot{
-    margin-top:8px;font-size:7pt;color:#555;display:flex;justify-content:space-between;gap:10px;
-  }
-  /* hide delete column on print */
-  table.lines th:last-child,
-  table.lines td:last-child{display:none}
+  .stat-note{margin:1.4mm 0 0;font-size:7pt;color:#5a6b7b}
 }
 </style>
 </head>
@@ -317,22 +353,177 @@ table.lines td.col-new{background:#e8f5ef !important}
       <small>عرض كامل · طباعة A4 أفقية</small>
     </div>
     <div class="top-actions">
+      <button type="button" class="btn ghost" id="openLib">السجلات</button>
       <button type="button" class="btn ghost" id="clearAll">تفريغ القائمة</button>
       <button type="button" class="btn print" id="printBtn">طباعة A4</button>
     </div>
   </div>
 </div>
 
-<div class="print-only print-head">
-  <div>
-    <h1>كشف احتساب التعرفة الجمركية</h1>
-    <div style="font-size:9pt;color:#555;margin-top:2px">عمليات الشراء والاستيراد — تقدير رسوم الاستيراد</div>
+<div class="lib no-print" id="library" hidden>
+  <div class="lib-card">
+    <div class="lib-head">
+      <h2>السجلات المحفوظة</h2>
+      <button type="button" class="btn sm ghost dark" id="libClose">إغلاق</button>
+    </div>
+    <div class="save-row">
+      <label class="field">
+        <span>اسم السجل</span>
+        <input id="saveName" type="text" maxlength="120" placeholder="مثال: شحنة آذار">
+      </label>
+      <button type="button" class="btn" id="saveBtn">حفظ</button>
+    </div>
+    <div id="saveList"></div>
+    <p class="lib-note" id="libMode">—</p>
   </div>
-  <div class="print-meta">
-    <div>التاريخ: <span id="printDate">—</span></div>
-    <div>سعر الصرف: <span id="printFx">1320</span> د.ع / $</div>
-    <div>عدد المواد: <span id="printCount">0</span></div>
+</div>
+
+<div class="print-sheet print-only" id="printSheet">
+  <header class="doc-banner">
+    <div>
+      <p class="doc-kicker">عمليات الشراء والاستيراد</p>
+      <h1>كشف احتساب التعرفة الجمركية</h1>
+      <p class="doc-sub">تقدير رسوم الاستيراد وسعر الوحدة بعد الرسوم والمصاريف</p>
+      <p class="doc-sub" id="printDocName" hidden></p>
+    </div>
+  </header>
+  <table class="doc meta">
+    <colgroup>
+      <col style="width:22%"><col style="width:10%"><col style="width:16%"><col style="width:16%"><col style="width:12%"><col style="width:24%">
+    </colgroup>
+    <thead>
+      <tr>
+        <th>التاريخ</th>
+        <th>عدد المواد</th>
+        <th>صرف المواد<span class="u">د.ع / $</span></th>
+        <th>صرف الرسوم<span class="u">د.ع / $</span></th>
+        <th>إعمار %</th>
+        <th>نطاق الرسوم</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td id="printDate">—</td>
+        <td class="num" id="printCount">0</td>
+        <td class="num" id="printFx">1,320</td>
+        <td class="num" id="printFxFees">1,320</td>
+        <td class="num" id="printRecon">5</td>
+        <td id="printScope">—</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="doc-section">
+    <h2>قائمة المواد</h2>
+    <table class="doc">
+      <colgroup>
+        <col style="width:3.2%"><col style="width:16%"><col style="width:5.6%"><col style="width:5.6%">
+        <col style="width:5.4%"><col style="width:7%"><col style="width:5%"><col style="width:5%">
+        <col style="width:7%"><col style="width:7.2%"><col style="width:8.2%"><col style="width:8.4%">
+        <col style="width:8%"><col style="width:8.4%">
+      </colgroup>
+      <thead>
+        <tr>
+          <th>#<span class="u">&nbsp;</span></th>
+          <th>المادة<span class="u">&nbsp;</span></th>
+          <th>أدنى<span class="u">USD</span></th>
+          <th>أعلى<span class="u">USD</span></th>
+          <th>الكمية<span class="u">&nbsp;</span></th>
+          <th>سعر الوحدة<span class="u">USD</span></th>
+          <th>تعرفة<span class="u">%</span></th>
+          <th>تأمين<span class="u">%</span></th>
+          <th>أساس الرسم<span class="u">USD</span></th>
+          <th>الرسوم<span class="u">USD</span></th>
+          <th>الرسوم<span class="u">د.ع</span></th>
+          <th>الفاتورة<span class="u">د.ع</span></th>
+          <th>المصاريف<span class="u">د.ع</span></th>
+          <th>سعر الوحدة<span class="u">د.ع</span></th>
+        </tr>
+      </thead>
+      <tbody id="printLines">
+        <tr><td class="doc-empty" colspan="14">لا توجد مواد</td></tr>
+      </tbody>
+      <tfoot>
+        <tr>
+          <td class="c-name" colspan="9">المجموع</td>
+          <td class="num" id="pfFeesUsd">0.00</td>
+          <td class="num" id="pfFeesIqd">0</td>
+          <td class="num" id="pfInvIqd">0</td>
+          <td class="num" id="pfAlloc">0</td>
+          <td class="num"></td>
+        </tr>
+      </tfoot>
+    </table>
   </div>
+
+  <div class="doc-section is-empty" id="printExpBlock">
+    <h2>المصاريف الإضافية</h2>
+    <table class="doc">
+      <colgroup>
+        <col style="width:6%"><col style="width:34%"><col style="width:15%"><col style="width:12%"><col style="width:15%"><col style="width:18%">
+      </colgroup>
+      <thead>
+        <tr>
+          <th>#<span class="u">&nbsp;</span></th>
+          <th>البيان<span class="u">&nbsp;</span></th>
+          <th>المبلغ</th>
+          <th>العملة</th>
+          <th>سعر الصرف<span class="u">د.ع</span></th>
+          <th>بالدينار</th>
+        </tr>
+      </thead>
+      <tbody id="printExpLines"></tbody>
+      <tfoot>
+        <tr>
+          <td class="c-name" colspan="5">إجمالي المصاريف</td>
+          <td class="num emph" id="pfExp">0</td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+
+  <div class="doc-section">
+    <h2>الإحصاءات</h2>
+    <table class="doc">
+      <colgroup>
+        <col style="width:34%"><col style="width:33%"><col style="width:33%">
+      </colgroup>
+      <thead>
+        <tr>
+          <th>البيان<span class="u">&nbsp;</span></th>
+          <th>دولار<span class="u">USD</span></th>
+          <th>دينار<span class="u">د.ع</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="c-name">قيمة المواد</td>
+          <td class="num" id="pMatUsd">0.00</td>
+          <td class="num" id="pMatIqd">0</td>
+        </tr>
+        <tr>
+          <td class="c-name">قيمة الرسوم</td>
+          <td class="num" id="pFeesUsd">0.00</td>
+          <td class="num" id="pFeesIqd">0</td>
+        </tr>
+        <tr>
+          <td class="c-name">قيمة المصاريف</td>
+          <td class="num" id="pExpUsd">0.00</td>
+          <td class="num" id="pExpIqd">0</td>
+        </tr>
+        <tr>
+          <td class="c-name grand">الإجمالي</td>
+          <td class="num grand" id="pGrandUsd">0.00</td>
+          <td class="num grand" id="pGrand">0</td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="stat-note">دولار المصاريف: مبلغ المصروف إذا كانت عملته دولاراً، وإلا قيمته بالدينار مقسومة على سعر صرف المواد.</p>
+  </div>
+  <footer class="doc-foot">
+    <span>مستند تقديري — لا يُعد بديلاً عن البيان الكمركي الرسمي</span>
+    <span>A4 أفقي</span>
+  </footer>
 </div>
 
 <header class="hero no-print">
@@ -342,20 +533,20 @@ table.lines td.col-new{background:#e8f5ef !important}
         <p class="kicker">عمليات الشراء والاستيراد · الكمارك العراقية</p>
         <h1>حاسبة التعرفة لعدة مواد + سعر الوحدة بعد الرسوم</h1>
         <p>
-          أضف المواد، حدّد الكمية والسعر، تُحسب الرسوم لكل بند ثم تُحوَّل بسعر الصرف وتُضاف على الفاتورة
-          لاستخراج سعر الوحدة الجديد. الصفحة تستخدم عرض المتصفح بالكامل، والطباعة على ورق A4 أفقي.
+          أضف المواد أولاً وحدد لكل مادة سعرها وأساس الرسم. للمواد سعر صرف، وللرسوم سعر صرف آخر.
+          ثم أضف المصاريف الإضافية، كل مصروف بعملته وسعر صرفه.
         </p>
         <div class="meta-row">
           <span class="pill" id="metaTariff">تعرفة: —</span>
           <span class="pill" id="metaVals">قيم مرجعية: —</span>
-          <span class="pill">الرسوم ($) × الصرف → دينار</span>
+          <span class="pill">فاتورة × صرف المواد + رسوم × صرف الرسوم</span>
         </div>
       </div>
       <div class="hero-stats">
-        <div class="hero-stat"><div class="lbl">إجمالي الفاتورة + الرسوم</div><div class="val" id="heroGrand">0 د.ع</div></div>
+        <div class="hero-stat"><div class="lbl">الإجمالي شامل المصاريف</div><div class="val" id="heroGrand">0 د.ع</div></div>
         <div class="hero-stat"><div class="lbl">عدد المواد في القائمة</div><div class="val" id="heroCount">0</div></div>
         <div class="hero-stat"><div class="lbl">إجمالي الرسوم</div><div class="val" id="heroFees">0 د.ع</div></div>
-        <div class="hero-stat"><div class="lbl">سعر الصرف</div><div class="val" id="heroFx">1,320</div></div>
+        <div class="hero-stat"><div class="lbl">صرف المواد / الرسوم</div><div class="val" id="heroFx">1,320 / 1,320</div></div>
       </div>
     </div>
   </div>
@@ -386,22 +577,16 @@ table.lines td.col-new{background:#e8f5ef !important}
 
       <div class="settings">
         <label class="field">
-          <span>سعر الصرف (دينار / دولار)</span>
-          <input id="fx" class="num" type="number" min="0" step="any" value="1320">
+          <span>سعر صرف المواد (دينار / دولار)</span>
+          <input id="fxGoods" class="num" type="number" min="0" step="any" value="1320">
+        </label>
+        <label class="field">
+          <span>سعر صرف الرسوم (دينار / دولار)</span>
+          <input id="fxFees" class="num" type="number" min="0" step="any" value="1320">
         </label>
         <label class="field">
           <span>إعادة إعمار %</span>
           <input id="reconPct" class="num" type="number" min="0" max="100" step="any" value="5">
-        </label>
-        <label class="field">
-          <span>أساس القيمة الكمركية</span>
-          <select id="basis">
-            <option value="higher">الأعلى بين الفاتورة والحد الأدنى</option>
-            <option value="invoice">سعر الفاتورة فقط</option>
-            <option value="min">الحد الأدنى الرسمي</option>
-            <option value="max">الحد الأعلى الرسمي</option>
-            <option value="avg">متوسط الحدّين</option>
-          </select>
         </label>
         <label class="field">
           <span>ما يشمله «الرسوم»</span>
@@ -415,54 +600,59 @@ table.lines td.col-new{background:#e8f5ef !important}
 
       <div class="formula">
         <strong>سعر الوحدة الجديد (د.ع)</strong> =
-        (قيمة الفاتورة بالدينار + الرسوم بالدولار × سعر الصرف) ÷ الكمية
+        (قيمة الفاتورة بالدولار × صرف المواد + الرسوم بالدولار × صرف الرسوم + حصة المصاريف) ÷ الكمية
+        <div style="margin-top:4px">أساس الرسم تكتبه أنت لكل مادة (دولار للوحدة). الرسوم = أساس الرسم × الكمية × النسب. المصاريف تُوزَّع بنسبة قيمة الفاتورة.</div>
       </div>
     </section>
 
     <aside class="card">
-      <h2>الإجماليات</h2>
-      <p class="sub">تتحدّث فوراً مع كل تعديل.</p>
-      <div class="summary">
-        <div class="sum-box">
-          <div class="lbl">قيمة الفاتورة (USD)</div>
-          <div class="val" id="sInvUsd">0.00 $</div>
-        </div>
-        <div class="sum-box">
-          <div class="lbl">الرسوم (USD)</div>
-          <div class="val" id="sFeesUsd">0.00 $</div>
-        </div>
-        <div class="sum-box">
-          <div class="lbl">الرسوم بعد الصرف</div>
-          <div class="val" id="sFeesIqd">0 د.ع</div>
-        </div>
-        <div class="sum-box grand">
-          <div class="lbl">الإجمالي النهائي (د.ع)</div>
-          <div class="val" id="sGrand">0 د.ع</div>
-        </div>
-      </div>
-      <p class="note">تقدير إرشادي — التخمين النهائي يعتمد على الأسيكودا والمستندات.</p>
+      <h2>الإحصاءات</h2>
+      <p class="sub">كل بند بالدولار والدينار.</p>
+      <table class="stat-table">
+        <thead>
+          <tr>
+            <th>البيان</th>
+            <th>دولار</th>
+            <th>دينار</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>قيمة المواد</td>
+            <td class="num" id="sMatUsd">0.00 $</td>
+            <td class="num" id="sMatIqd">0 د.ع</td>
+          </tr>
+          <tr>
+            <td>قيمة الرسوم</td>
+            <td class="num" id="sFeesUsd">0.00 $</td>
+            <td class="num" id="sFeesIqd">0 د.ع</td>
+          </tr>
+          <tr>
+            <td>قيمة المصاريف</td>
+            <td class="num" id="sExpUsd">0.00 $</td>
+            <td class="num" id="sExpIqd">0 د.ع</td>
+          </tr>
+          <tr class="grand">
+            <td>الإجمالي</td>
+            <td class="num" id="sGrandUsd">0.00 $</td>
+            <td class="num" id="sGrand">0 د.ع</td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="note">دولار المصاريف يُحسب من عملة المصروف، أو من الدينار بسعر صرف المواد. التقدير إرشادي.</p>
     </aside>
   </div>
 
-  <!-- print settings strip -->
-  <section class="card print-only">
-    <div class="settings">
-      <label class="field"><span>سعر الصرف</span><div id="printFx2">1320</div></label>
-      <label class="field"><span>إعادة إعمار %</span><div id="printRecon">5</div></label>
-      <label class="field"><span>أساس القيمة</span><div id="printBasis">—</div></label>
-      <label class="field"><span>نطاق الرسوم</span><div id="printScope">—</div></label>
-    </div>
-  </section>
-
-  <section class="card table-card">
+  <section class="card table-card screen-only">
     <div class="card-head">
       <div>
-        <h2>2) قائمة المواد والاحتساب التفصيلي</h2>
+        <h2>2) قائمة المواد</h2>
         <p class="sub" id="lineCount">لا توجد مواد بعد.</p>
       </div>
       <div class="legend-limits no-print">
         <span><i class="legend-swatch lim"></i> الحدود الرسمية</span>
         <span><i class="legend-swatch res"></i> نتائج الاحتساب</span>
+        <span><i class="legend-swatch exp"></i> حصة المصاريف</span>
         <span><i class="legend-swatch nw"></i> سعر الوحدة الجديد</span>
       </div>
     </div>
@@ -479,32 +669,42 @@ table.lines td.col-new{background:#e8f5ef !important}
             <th>سعر الوحدة<span class="th-sub">USD</span></th>
             <th>تعرفة %</th>
             <th>تأمين %</th>
-            <th>القيمة الكمركية<span class="th-sub">USD</span></th>
+            <th>أساس الرسم<span class="th-sub">USD / وحدة</span></th>
             <th>الرسوم<span class="th-sub">USD</span></th>
             <th>الرسوم<span class="th-sub">د.ع</span></th>
             <th>قيمة الفاتورة<span class="th-sub">د.ع</span></th>
+            <th>حصة المصاريف<span class="th-sub">د.ع</span></th>
             <th>سعر الوحدة الجديد<span class="th-sub">د.ع</span></th>
             <th class="no-print"></th>
           </tr>
         </thead>
         <tbody id="tbody">
-          <tr><td colspan="14" class="empty">أضف مادة من البحث أعلاه</td></tr>
+          <tr><td colspan="15" class="empty">أضف مادة من البحث أعلاه</td></tr>
         </tbody>
       </table>
     </div>
   </section>
 
-  <!-- print summary -->
-  <section class="card print-only">
-    <div class="summary">
-      <div class="sum-box"><div class="lbl">قيمة الفاتورة (USD)</div><div class="val" id="pInvUsd">0</div></div>
-      <div class="sum-box"><div class="lbl">الرسوم (USD)</div><div class="val" id="pFeesUsd">0</div></div>
-      <div class="sum-box"><div class="lbl">الرسوم (د.ع)</div><div class="val" id="pFeesIqd">0</div></div>
-      <div class="sum-box grand"><div class="lbl">الإجمالي (د.ع)</div><div class="val" id="pGrand">0</div></div>
+  <section class="card is-empty screen-only" id="expensesCard">
+    <div class="card-head">
+      <div>
+        <h2>3) مصاريف إضافية</h2>
+        <p class="sub">بعد المواد: أضف أي عدد من المصاريف. لكل مصروف عملته وسعر صرفه إلى الدينار.</p>
+      </div>
+      <button type="button" class="btn sm no-print" id="addExpense">+ مصروف</button>
     </div>
-    <div class="print-foot">
-      <span>مستند تقديري — لا يُعد بديلاً عن البيان الكمركي الرسمي</span>
-      <span>A4 Landscape</span>
+    <div class="exp-presets no-print">
+      <button type="button" class="btn sm ghost dark" data-preset="شحن">+ شحن</button>
+      <button type="button" class="btn sm ghost dark" data-preset="تخليص جمركي">+ تخليص</button>
+      <button type="button" class="btn sm ghost dark" data-preset="نقل داخلي">+ نقل</button>
+      <button type="button" class="btn sm ghost dark" data-preset="تأمين">+ تأمين</button>
+      <button type="button" class="btn sm ghost dark" data-preset="أجور مصرفية">+ أجور مصرف</button>
+      <button type="button" class="btn sm ghost dark" data-preset="تخزين">+ تخزين</button>
+    </div>
+    <div class="exp-list" id="expenseList"></div>
+    <div class="exp-total">
+      <span>إجمالي المصاريف بالدينار</span>
+      <span class="val" id="expTotal">0 د.ع</span>
     </div>
   </section>
 </main>
@@ -523,9 +723,22 @@ table.lines td.col-new{background:#e8f5ef !important}
   const catalog = data.items || [];
   const tariff = data.tariff || {};
   const lines = [];
+  const expenses = [];
   let pending = null;
   let searchTimer = null;
   let uid = 1;
+  let eid = 1;
+
+  const CURRENCIES = [
+    ['USD', 'دولار USD'],
+    ['EUR', 'يورو EUR'],
+    ['AED', 'درهم AED'],
+    ['CNY', 'يوان CNY'],
+    ['TRY', 'ليرة TRY'],
+    ['GBP', 'جنيه GBP'],
+    ['IQD', 'دينار IQD'],
+    ['OTHER', 'عملة أخرى'],
+  ];
 
   document.getElementById('metaTariff').textContent =
     'تعرفة: ' + (data.meta?.tariffCount || Object.keys(tariff).length).toLocaleString('en-US') + ' بند';
@@ -551,11 +764,23 @@ table.lines td.col-new{background:#e8f5ef !important}
       .replace(/[أإآ]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي')
       .replace(/\s+/g, ' ').trim();
   }
+  function fmtNum(n) {
+    return num(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
   function fmtUsd(n) {
     return n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' $';
   }
   function fmtIqd(n) {
     return Math.round(n).toLocaleString('en-US') + ' د.ع';
+  }
+  function fmtInt(n) {
+    return Math.round(num(n)).toLocaleString('en-US');
+  }
+  function fmtQty(n) {
+    return num(n).toLocaleString('en-US', { maximumFractionDigits: 4 });
+  }
+  function fmtPct(n) {
+    return num(n).toLocaleString('en-US', { maximumFractionDigits: 2 });
   }
   function fmtLimit(n) {
     if (n == null || Number.isNaN(n)) return '—';
@@ -634,20 +859,15 @@ table.lines td.col-new{background:#e8f5ef !important}
     addBtn.disabled = false;
   }
 
-  function customsUnit(line) {
-    const inv = line.price;
-    const mn = line.min;
-    const mx = line.max;
-    const mode = el('basis').value;
-    if (mode === 'invoice') return inv;
-    if (mode === 'min') return mn != null ? mn : inv;
-    if (mode === 'max') return mx != null ? mx : inv;
-    if (mode === 'avg') {
-      if (mn != null && mx != null) return (mn + mx) / 2;
-      return mn != null ? mn : (mx != null ? mx : inv);
+  function dutyBaseStatus(line) {
+    const base = num(line.dutyBase);
+    if (line.min != null && base > 0 && base < line.min) {
+      return { cls: 'below-min', hint: 'أقل من الحد الأدنى', hintCls: 'low' };
     }
-    if (mn == null) return inv;
-    return Math.max(inv || 0, mn);
+    if (line.max != null && base > line.max) {
+      return { cls: 'above-max', hint: 'أعلى من الحد الأعلى', hintCls: 'high' };
+    }
+    return { cls: '', hint: '', hintCls: '' };
   }
 
   function feeUsd(line, customsValue) {
@@ -663,16 +883,63 @@ table.lines td.col-new{background:#e8f5ef !important}
   function calcLine(line) {
     const qty = line.qty;
     const price = line.price;
-    const fx = num(el('fx').value) || 1320;
-    const cUnit = customsUnit(line);
+    const fxGoods = num(el('fxGoods').value) || 1320;
+    const fxFees = num(el('fxFees').value) || 1320;
+    const cUnit = num(line.dutyBase);
     const customsValue = cUnit * qty;
     const feesUsd = feeUsd(line, customsValue);
-    const feesIqd = feesUsd * fx;
+    const feesIqd = feesUsd * fxFees;
     const invoiceUsd = qty * price;
-    const invoiceIqd = invoiceUsd * fx;
+    const invoiceIqd = invoiceUsd * fxGoods;
     const totalIqd = invoiceIqd + feesIqd;
     const newUnit = qty > 0 ? totalIqd / qty : 0;
-    return { customsValue, feesUsd, feesIqd, invoiceUsd, invoiceIqd, totalIqd, newUnit };
+    return { customsValue, feesUsd, feesIqd, invoiceUsd, invoiceIqd, totalIqd, newUnit, alloc: 0 };
+  }
+
+  function currencyShort(exp) {
+    if (exp.currency === 'OTHER') return (exp.currencyCode || 'أخرى').trim().toUpperCase() || 'أخرى';
+    return exp.currency;
+  }
+
+  function expenseIqd(exp) {
+    const amount = num(exp.amount);
+    if (exp.currency === 'IQD') return amount;
+    return amount * num(exp.fx);
+  }
+
+  function expensesUsd(fxGoods) {
+    return expenses.reduce((s, exp) => {
+      if (exp.currency === 'USD') return s + num(exp.amount);
+      const iqd = expenseIqd(exp);
+      return s + (fxGoods > 0 ? iqd / fxGoods : 0);
+    }, 0);
+  }
+
+  function totalExpensesIqd() {
+    return expenses.reduce((s, e) => s + expenseIqd(e), 0);
+  }
+
+  function expenseFormula(exp) {
+    if (exp.currency === 'IQD') return fmtNum(exp.amount) + ' د.ع';
+    return fmtNum(exp.amount) + ' ' + currencyShort(exp) + ' × ' + num(exp.fx).toLocaleString('en-US');
+  }
+
+  function withAlloc(calcs) {
+    const totalExp = totalExpensesIqd();
+    const inv = calcs.reduce((s, c) => s + c.invoiceUsd, 0);
+    return calcs.map((c, i) => {
+      let alloc = 0;
+      if (totalExp && calcs.length) {
+        alloc = inv > 0 ? totalExp * (c.invoiceUsd / inv) : totalExp / calcs.length;
+      }
+      const totalIqd = c.invoiceIqd + c.feesIqd + alloc;
+      const qty = lines[i] ? lines[i].qty : 0;
+      return Object.assign({}, c, {
+        alloc: alloc,
+        totalIqd: totalIqd,
+        newUnit: qty > 0 ? totalIqd / qty : 0,
+      });
+    });
   }
 
   function addLine(it, qty, price) {
@@ -681,6 +948,7 @@ table.lines td.col-new{background:#e8f5ef !important}
       id: uid++,
       hs: it.hs, tsc: it.tsc || '', title: it.title || '', desc: it.desc || '',
       unit: it.unit || '', min: it.min, max: it.max, qty, price,
+      dutyBase: price || (it.min != null ? it.min : 0),
       dutyPct: rate.found ? rate.duty : 0,
       insurPct: rate.found ? rate.insur : 0,
       prohibited: rate.prohibited,
@@ -697,38 +965,94 @@ table.lines td.col-new{background:#e8f5ef !important}
     const invUsd = calcs.reduce((s, c) => s + c.invoiceUsd, 0);
     const feesUsd = calcs.reduce((s, c) => s + c.feesUsd, 0);
     const feesIqd = calcs.reduce((s, c) => s + c.feesIqd, 0);
-    const grand = calcs.reduce((s, c) => s + c.totalIqd, 0);
-    const fx = num(el('fx').value) || 1320;
+    const expIqd = totalExpensesIqd();
+    const invIqd = calcs.reduce((s, c) => s + c.invoiceIqd, 0);
+    const fxGoods = num(el('fxGoods').value) || 1320;
+    const fxFees = num(el('fxFees').value) || 1320;
+    const expUsd = expensesUsd(fxGoods);
+    const grandIqd = invIqd + feesIqd + expIqd;
+    const grandUsd = invUsd + feesUsd + expUsd;
 
-    el('sInvUsd').textContent = fmtUsd(invUsd);
+    el('sMatUsd').textContent = fmtUsd(invUsd);
+    el('sMatIqd').textContent = fmtIqd(invIqd);
     el('sFeesUsd').textContent = fmtUsd(feesUsd);
     el('sFeesIqd').textContent = fmtIqd(feesIqd);
-    el('sGrand').textContent = fmtIqd(grand);
+    el('sExpUsd').textContent = fmtUsd(expUsd);
+    el('sExpIqd').textContent = fmtIqd(expIqd);
+    el('sGrandUsd').textContent = fmtUsd(grandUsd);
+    el('sGrand').textContent = fmtIqd(grandIqd);
 
-    el('heroGrand').textContent = fmtIqd(grand);
+    el('heroGrand').textContent = fmtIqd(grandIqd);
     el('heroFees').textContent = fmtIqd(feesIqd);
     el('heroCount').textContent = String(lines.length);
-    el('heroFx').textContent = fx.toLocaleString('en-US');
+    el('heroFx').textContent = fxGoods.toLocaleString('en-US') + ' / ' + fxFees.toLocaleString('en-US');
+    fillPrint(calcs, feesUsd, feesIqd, invUsd, expIqd, invIqd, expUsd, grandUsd, grandIqd, fxGoods, fxFees);
+  }
 
-    el('pInvUsd').textContent = fmtUsd(invUsd);
-    el('pFeesUsd').textContent = fmtUsd(feesUsd);
-    el('pFeesIqd').textContent = fmtIqd(feesIqd);
-    el('pGrand').textContent = fmtIqd(grand);
+  function fillPrint(calcs, feesUsd, feesIqd, invUsd, expIqd, invIqd, expUsd, grandUsd, grandIqd, fxGoods, fxFees) {
+    const body = el('printLines');
+    const table = body.closest('table');
+    table.classList.toggle('is-empty', lines.length === 0);
+    body.innerHTML = lines.length
+      ? lines.map((line, i) => {
+          const c = calcs[i];
+          const name = line.title || line.desc || line.hs;
+          const code = line.hs + (line.tsc ? ' · ' + line.tsc : '');
+          return `<tr>
+            <td class="num">${i + 1}</td>
+            <td class="c-name"><div class="pn">${escapeHtml(name)}</div><div class="pm">${escapeHtml(code)}</div></td>
+            <td class="num">${fmtLimit(line.min)}</td>
+            <td class="num">${fmtLimit(line.max)}</td>
+            <td class="num">${fmtQty(line.qty)}</td>
+            <td class="num">${fmtNum(line.price)}</td>
+            <td class="num">${fmtPct(line.dutyPct)}</td>
+            <td class="num">${fmtPct(line.insurPct)}</td>
+            <td class="num">${fmtNum(line.dutyBase)}</td>
+            <td class="num">${fmtNum(c.feesUsd)}</td>
+            <td class="num">${fmtInt(c.feesIqd)}</td>
+            <td class="num">${fmtInt(c.invoiceIqd)}</td>
+            <td class="num">${fmtInt(c.alloc || 0)}</td>
+            <td class="num emph">${fmtInt(c.newUnit)}</td>
+          </tr>`;
+        }).join('')
+      : '<tr><td class="doc-empty" colspan="14">لا توجد مواد</td></tr>';
+
+    const expBlock = el('printExpBlock');
+    expBlock.classList.toggle('is-empty', expenses.length === 0);
+    el('printExpLines').innerHTML = expenses.map((exp, i) => `<tr>
+      <td class="num">${i + 1}</td>
+      <td class="c-name">${escapeHtml(exp.name || '—')}</td>
+      <td class="num">${fmtNum(exp.amount)}</td>
+      <td class="num">${escapeHtml(currencyShort(exp))}</td>
+      <td class="num">${exp.currency === 'IQD' ? '1' : fmtNum(exp.fx)}</td>
+      <td class="num emph">${fmtInt(expenseIqd(exp))}</td>
+    </tr>`).join('');
+
+    el('pfFeesUsd').textContent = fmtNum(feesUsd);
+    el('pfFeesIqd').textContent = fmtInt(feesIqd);
+    el('pfInvIqd').textContent = fmtInt(invIqd);
+    el('pfAlloc').textContent = fmtInt(expIqd);
+    el('pfExp').textContent = fmtInt(expIqd);
+    el('pMatUsd').textContent = fmtNum(invUsd);
+    el('pMatIqd').textContent = fmtInt(invIqd);
+    el('pFeesUsd').textContent = fmtNum(feesUsd);
+    el('pFeesIqd').textContent = fmtInt(feesIqd);
+    el('pExpUsd').textContent = fmtNum(expUsd);
+    el('pExpIqd').textContent = fmtInt(expIqd);
+    el('pGrandUsd').textContent = fmtNum(grandUsd);
+    el('pGrand').textContent = fmtInt(grandIqd);
+    const docName = el('printDocName');
+    docName.hidden = !currentName;
+    docName.textContent = currentName ? ('السجل: ' + currentName) : '';
     el('printCount').textContent = String(lines.length);
-    el('printFx').textContent = fx.toLocaleString('en-US');
-    el('printFx2').textContent = fx.toLocaleString('en-US');
+    el('printFx').textContent = fxGoods.toLocaleString('en-US');
+    el('printFxFees').textContent = fxFees.toLocaleString('en-US');
     el('printRecon').textContent = el('reconPct').value;
-    el('printBasis').textContent = el('basis').selectedOptions[0]?.text || '—';
     el('printScope').textContent = el('feeScope').selectedOptions[0]?.text || '—';
   }
 
   function patchRow(tr, c, line) {
     const cells = tr.children;
-    cells[8].textContent = fmtUsd(c.customsValue);
-    cells[9].textContent = fmtUsd(c.feesUsd);
-    cells[10].textContent = fmtIqd(c.feesIqd);
-    cells[11].textContent = fmtIqd(c.invoiceIqd);
-    cells[12].innerHTML = `<span class="new-price money">${fmtIqd(c.newUnit)}</span>`;
     if (line) {
       const st = priceStatus(line);
       const priceInp = cells[5].querySelector('input');
@@ -741,30 +1065,61 @@ table.lines td.col-new{background:#e8f5ef !important}
         hint.textContent = st.hint;
         hint.className = 'price-hint ' + st.hintCls;
       }
+      const baseSt = dutyBaseStatus(line);
+      const baseInp = cells[8].querySelector('input');
+      const baseHint = cells[8].querySelector('[data-base-hint]');
+      if (baseInp) {
+        baseInp.classList.remove('below-min', 'above-max');
+        if (baseSt.cls) baseInp.classList.add(baseSt.cls);
+      }
+      if (baseHint) {
+        baseHint.textContent = (baseSt.hint ? baseSt.hint + ' · ' : '') + 'الإجمالي ' + fmtUsd(c.customsValue);
+        baseHint.className = 'price-hint ' + baseSt.hintCls;
+      }
     }
+    cells[9].textContent = fmtUsd(c.feesUsd);
+    cells[10].textContent = fmtIqd(c.feesIqd);
+    cells[11].textContent = fmtIqd(c.invoiceIqd);
+    cells[12].textContent = fmtIqd(c.alloc || 0);
+    cells[13].innerHTML = `<span class="new-price money">${fmtIqd(c.newUnit)}</span>`;
+  }
+
+  function paintExpenseTotals() {
+    const totalEl = el('expTotal');
+    if (totalEl) totalEl.textContent = fmtIqd(totalExpensesIqd());
+    el('expensesCard').classList.toggle('is-empty', expenses.length === 0);
+    document.querySelectorAll('.exp-row').forEach((row) => {
+      const exp = expenses.find((e) => e.id === +row.dataset.eid);
+      if (!exp) return;
+      const out = row.querySelector('[data-eiqd]');
+      if (out) out.textContent = fmtIqd(expenseIqd(exp));
+      const meta = row.querySelector('[data-emeta]');
+      if (meta) meta.textContent = expenseFormula(exp);
+    });
   }
 
   function refreshComputed() {
-    const calcs = lines.map(calcLine);
+    const calcs = withAlloc(lines.map(calcLine));
     el('tbody').querySelectorAll('tr[data-id]').forEach((tr, i) => {
       if (calcs[i]) patchRow(tr, calcs[i], lines[i]);
     });
+    paintExpenseTotals();
     updateSummary(calcs);
   }
 
   function render() {
     el('lineCount').textContent = lines.length
-      ? (lines.length + ' مادة — عدّل الكمية والسعر والنسب في الجدول')
+      ? (lines.length + ' مادة — عدّل الكمية والسعر وأساس الرسم في الجدول')
       : 'لا توجد مواد بعد.';
 
     const tbody = el('tbody');
     if (!lines.length) {
-      tbody.innerHTML = '<tr><td colspan="14" class="empty">أضف مادة من البحث أعلاه</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="15" class="empty">أضف مادة من البحث أعلاه</td></tr>';
       updateSummary([]);
       return;
     }
 
-    const calcs = lines.map(calcLine);
+    const calcs = withAlloc(lines.map(calcLine));
     tbody.innerHTML = lines.map((line, i) => {
       const c = calcs[i];
       const st = priceStatus(line);
@@ -791,10 +1146,14 @@ table.lines td.col-new{background:#e8f5ef !important}
         </td>
         <td class="col-input"><input class="num" data-f="dutyPct" type="number" min="0" max="100" step="any" value="${line.dutyPct}"></td>
         <td class="col-input"><input class="num" data-f="insurPct" type="number" min="0" max="100" step="any" value="${line.insurPct}"></td>
-        <td class="money col-result">${fmtUsd(c.customsValue)}</td>
+        <td class="col-input col-price">
+          <input class="num ${dutyBaseStatus(line).cls}" data-f="dutyBase" type="number" min="0" step="any" value="${line.dutyBase}">
+          <div class="price-hint ${dutyBaseStatus(line).hintCls}" data-base-hint>${escapeHtml((dutyBaseStatus(line).hint ? dutyBaseStatus(line).hint + ' · ' : '') + 'الإجمالي ' + fmtUsd(c.customsValue))}</div>
+        </td>
         <td class="money col-result">${fmtUsd(c.feesUsd)}</td>
         <td class="money col-result">${fmtIqd(c.feesIqd)}</td>
         <td class="money col-result">${fmtIqd(c.invoiceIqd)}</td>
+        <td class="money col-exp">${fmtIqd(c.alloc || 0)}</td>
         <td class="col-new"><span class="new-price money">${fmtIqd(c.newUnit)}</span></td>
         <td class="no-print"><button type="button" class="btn sm danger" data-del="${line.id}">حذف</button></td>
       </tr>`;
@@ -855,8 +1214,114 @@ table.lines td.col-new{background:#e8f5ef !important}
     addLine(pending, qty, price);
   });
 
+  function renderExpenses(focusLast) {
+    const box = el('expenseList');
+    el('expensesCard').classList.toggle('is-empty', expenses.length === 0);
+    if (!expenses.length) {
+      box.innerHTML = '<div class="exp-empty">لا توجد مصاريف إضافية. أضف شحناً أو تخليصاً أو أي كلفة، بعملتها وسعر صرفها.</div>';
+      paintExpenseTotals();
+      return;
+    }
+    box.innerHTML = expenses.map((exp) => {
+      const options = CURRENCIES.map(([code, label]) =>
+        `<option value="${code}"${exp.currency === code ? ' selected' : ''}>${label}</option>`
+      ).join('');
+      const iqdLocked = exp.currency === 'IQD';
+      return `<div class="exp-row" data-eid="${exp.id}">
+        <label class="field">
+          <span>البيان</span>
+          <input data-ef="name" type="text" value="${escapeHtml(exp.name)}" placeholder="مثال: شحن بحري">
+        </label>
+        <label class="field">
+          <span>المبلغ</span>
+          <input class="num" data-ef="amount" type="number" min="0" step="any" value="${exp.amount}">
+        </label>
+        <label class="field">
+          <span>العملة</span>
+          <select data-ef="currency">${options}</select>
+          <input class="exp-code" data-ef="currencyCode" type="text" maxlength="8" placeholder="رمز العملة"
+            value="${escapeHtml(exp.currencyCode || '')}" ${exp.currency === 'OTHER' ? '' : 'hidden'}>
+        </label>
+        <label class="field">
+          <span>سعر الصرف إلى الدينار</span>
+          <input class="num" data-ef="fx" type="number" min="0" step="any" value="${exp.fx}" ${iqdLocked ? 'disabled' : ''}>
+        </label>
+        <div class="exp-iqd">
+          <span class="lbl">بالدينار</span>
+          <div class="val" data-eiqd>${fmtIqd(expenseIqd(exp))}</div>
+          <div class="meta en" data-emeta>${escapeHtml(expenseFormula(exp))}</div>
+        </div>
+        <button type="button" class="btn sm danger no-print" data-edel="${exp.id}">حذف</button>
+      </div>`;
+    }).join('');
+    if (focusLast) {
+      const names = box.querySelectorAll('[data-ef="name"]');
+      const last = names[names.length - 1];
+      if (last) last.focus();
+    }
+  }
+
+  function addExpense(name) {
+    const fx = num(el('fxGoods').value) || 1320;
+    expenses.push({
+      id: eid++,
+      name: name || '',
+      amount: 0,
+      currency: 'USD',
+      currencyCode: '',
+      fx: fx,
+    });
+    renderExpenses(true);
+    refreshComputed();
+  }
+
+  function onExpenseInput(e) {
+    const row = e.target.closest('.exp-row');
+    if (!row) return;
+    const exp = expenses.find((x) => x.id === +row.dataset.eid);
+    if (!exp) return;
+    const f = e.target.dataset.ef;
+    if (!f) return;
+    if (f === 'name' || f === 'currency' || f === 'currencyCode') exp[f] = e.target.value.trim();
+    else exp[f] = num(e.target.value);
+    if (f === 'currency') {
+      const fxInp = row.querySelector('[data-ef="fx"]');
+      const codeInp = row.querySelector('[data-ef="currencyCode"]');
+      if (exp.currency === 'IQD') {
+        exp.fx = 1;
+        if (fxInp) { fxInp.value = '1'; fxInp.disabled = true; }
+      } else if (exp.currency === 'USD') {
+          exp.fx = num(el('fxGoods').value) || 1320;
+        if (fxInp) { fxInp.disabled = false; fxInp.value = String(exp.fx); }
+      } else {
+        exp.fx = 0;
+        if (fxInp) { fxInp.disabled = false; fxInp.value = ''; }
+      }
+      if (codeInp) codeInp.hidden = exp.currency !== 'OTHER';
+    }
+    if (f === 'name') exp.name = e.target.value;
+    refreshComputed();
+  }
+
+  el('expenseList').addEventListener('input', onExpenseInput);
+  el('expenseList').addEventListener('change', onExpenseInput);
+  el('expenseList').addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-edel]');
+    if (!btn) return;
+    const idx = expenses.findIndex((x) => x.id === +btn.getAttribute('data-edel'));
+    if (idx >= 0) expenses.splice(idx, 1);
+    renderExpenses(false);
+    refreshComputed();
+  });
+  el('addExpense').addEventListener('click', () => addExpense(''));
+  document.querySelectorAll('[data-preset]').forEach((btn) => {
+    btn.addEventListener('click', () => addExpense(btn.dataset.preset));
+  });
+
   el('clearAll').addEventListener('click', () => {
     lines.length = 0;
+    currentId = null;
+    currentName = '';
     render();
   });
 
@@ -866,11 +1331,210 @@ table.lines td.col-new{background:#e8f5ef !important}
   });
   window.addEventListener('beforeprint', preparePrint);
 
-  ['fx', 'reconPct', 'basis', 'feeScope'].forEach((id) => {
+  ['fxGoods', 'fxFees', 'reconPct', 'feeScope'].forEach((id) => {
     el(id).addEventListener('input', refreshComputed);
     el(id).addEventListener('change', refreshComputed);
   });
 
+  let currentId = null;
+  let currentName = '';
+  let useServer = false;
+
+  function snapshot() {
+    return {
+      fxGoods: el('fxGoods').value,
+      fxFees: el('fxFees').value,
+      reconPct: el('reconPct').value,
+      feeScope: el('feeScope').value,
+      lines: lines.map((l) => Object.assign({}, l)),
+      expenses: expenses.map((e) => Object.assign({}, e)),
+    };
+  }
+
+  function applySnapshot(data) {
+    el('fxGoods').value = data.fxGoods ?? '1320';
+    el('fxFees').value = data.fxFees ?? '1320';
+    el('reconPct').value = data.reconPct ?? '5';
+    el('feeScope').value = data.feeScope || 'all';
+    lines.length = 0;
+    (data.lines || []).forEach((l) => lines.push(l));
+    expenses.length = 0;
+    (data.expenses || []).forEach((e) => expenses.push(e));
+    uid = lines.reduce((m, l) => Math.max(m, num(l.id) + 1), 1);
+    eid = expenses.reduce((m, e) => Math.max(m, num(e.id) + 1), 1);
+    renderExpenses(false);
+    render();
+  }
+
+  function idb() {
+    return new Promise((resolve, reject) => {
+      const req = indexedDB.open('customs-calculator', 1);
+      req.onupgradeneeded = () => {
+        const db = req.result;
+        if (!db.objectStoreNames.contains('records')) {
+          db.createObjectStore('records', { keyPath: 'id', autoIncrement: true });
+        }
+      };
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+  }
+
+  async function detectStore() {
+    if (location.protocol === 'file:') return false;
+    try {
+      const res = await fetch('/api/health', { cache: 'no-store' });
+      return res.ok;
+    } catch (err) {
+      return false;
+    }
+  }
+
+  async function listRecords() {
+    if (useServer) {
+      const res = await fetch('/api/records', { cache: 'no-store' });
+      if (!res.ok) throw new Error('list');
+      return res.json();
+    }
+    const db = await idb();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction('records', 'readonly');
+      const req = tx.objectStore('records').getAll();
+      req.onsuccess = () => {
+        const rows = (req.result || []).slice().sort((a, b) => String(b.updated_at).localeCompare(String(a.updated_at)));
+        resolve(rows.map((r) => ({ id: r.id, name: r.name, updated_at: r.updated_at })));
+      };
+      req.onerror = () => reject(req.error);
+    });
+  }
+
+  async function readRecord(id) {
+    if (useServer) {
+      const res = await fetch('/api/records/' + id, { cache: 'no-store' });
+      if (!res.ok) throw new Error('read');
+      return res.json();
+    }
+    const db = await idb();
+    return new Promise((resolve, reject) => {
+      const req = db.transaction('records', 'readonly').objectStore('records').get(Number(id));
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+  }
+
+  async function writeRecord(name) {
+    const body = { id: currentId, name: name, payload: snapshot() };
+    if (useServer) {
+      const res = await fetch('/api/records', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) throw new Error('save');
+      return res.json();
+    }
+    const db = await idb();
+    const now = new Date().toISOString();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction('records', 'readwrite');
+      const store = tx.objectStore('records');
+      const row = { name: name, payload: body.payload, updated_at: now };
+      if (currentId) row.id = Number(currentId);
+      const req = store.put(row);
+      req.onsuccess = () => resolve({ id: req.result, name: name, updated_at: now });
+      req.onerror = () => reject(req.error);
+    });
+  }
+
+  async function removeRecord(id) {
+    if (useServer) {
+      const res = await fetch('/api/records/' + id, { method: 'DELETE' });
+      if (!res.ok) throw new Error('delete');
+      return;
+    }
+    const db = await idb();
+    return new Promise((resolve, reject) => {
+      const req = db.transaction('records', 'readwrite').objectStore('records').delete(Number(id));
+      req.onsuccess = () => resolve();
+      req.onerror = () => reject(req.error);
+    });
+  }
+
+  async function refreshLibrary() {
+    const box = el('saveList');
+    let rows = [];
+    try {
+      rows = await listRecords();
+    } catch (err) {
+      box.innerHTML = '<div class="lib-empty">تعذّر قراءة السجلات</div>';
+      return;
+    }
+    if (!rows.length) {
+      box.innerHTML = '<div class="lib-empty">لا توجد سجلات محفوظة بعد</div>';
+      return;
+    }
+    box.innerHTML = rows.map((r) => `<div class="save-item">
+      <div><b>${escapeHtml(r.name)}</b><div class="meta">${escapeHtml(r.updated_at || '')}</div></div>
+      <button type="button" class="btn sm ghost dark" data-load="${r.id}">فتح</button>
+      <button type="button" class="btn sm danger" data-drop="${r.id}">حذف</button>
+    </div>`).join('');
+  }
+
+  async function openLibrary() {
+    el('library').hidden = false;
+    el('saveName').value = currentName || '';
+    el('libMode').textContent = useServer
+      ? 'الحفظ في قاعدة البيانات المحلية: data\\calculator.db'
+      : 'الحفظ داخل هذا المتصفح. لملف قاعدة بيانات على الجهاز، شغّل «تشغيل الحاسبة».';
+    await refreshLibrary();
+  }
+
+  el('openLib').addEventListener('click', () => { openLibrary(); });
+  el('libClose').addEventListener('click', () => { el('library').hidden = true; });
+  el('library').addEventListener('click', (e) => {
+    if (e.target === el('library')) el('library').hidden = true;
+  });
+  el('saveBtn').addEventListener('click', async () => {
+    const name = el('saveName').value.trim();
+    if (!name) { el('saveName').focus(); return; }
+    const previousId = currentId;
+    if (currentName && name !== currentName) currentId = null;
+    try {
+      const saved = await writeRecord(name);
+      currentId = saved.id;
+      currentName = saved.name || name;
+      await refreshLibrary();
+      refreshComputed();
+    } catch (err) {
+      currentId = previousId;
+      el('libMode').textContent = 'تعذّر الحفظ. أعد المحاولة.';
+    }
+  });
+  el('saveList').addEventListener('click', async (e) => {
+    const loadId = e.target.getAttribute('data-load');
+    const dropId = e.target.getAttribute('data-drop');
+    try {
+      if (loadId) {
+        const rec = await readRecord(loadId);
+        if (!rec) return;
+        currentId = rec.id;
+        currentName = rec.name || '';
+        el('saveName').value = currentName;
+        applySnapshot(rec.payload || {});
+        el('library').hidden = true;
+      } else if (dropId) {
+        if (!window.confirm('حذف هذا السجل؟')) return;
+        await removeRecord(dropId);
+        if (String(currentId) === String(dropId)) { currentId = null; currentName = ''; }
+        await refreshLibrary();
+      }
+    } catch (err) {
+      el('libMode').textContent = 'تعذّر تنفيذ العملية.';
+    }
+  });
+
+  detectStore().then((ok) => { useServer = ok; });
+  renderExpenses(false);
   render();
 })();
 </script>
