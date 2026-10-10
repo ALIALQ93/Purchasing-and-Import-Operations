@@ -1,5 +1,10 @@
 # -*- coding: utf-8 -*-
-"""Extract customs tariff rates from PDF and valuations from HSC.xlsx."""
+"""Extract customs tariff rates from PDF and valuations from HSC.xlsx.
+
+Duty and insurance percentages are then taken from tariffs_gcc_iq_2026.csv.
+The prohibited flag stays with the schedule already extracted from the PDF.
+"""
+import csv
 import json
 import os
 import re
@@ -195,6 +200,22 @@ tmap = {
     for e in tariff
 }
 
+csv_path = "tariffs_gcc_iq_2026.csv"
+csv_applied = 0
+if os.path.exists(csv_path):
+    with open(csv_path, encoding="utf-8-sig", newline="") as f:
+        for row in csv.DictReader(f):
+            code = row["HS CODE"].strip()
+            if code not in tmap:
+                continue
+            duty = float(row["التعرفة الكمركية"])
+            insur = float(row["الامانات الضريبية"])
+            current = tmap[code]
+            if current[0] != duty or current[1] != insur:
+                csv_applied += 1
+            tmap[code] = [duty, insur, current[2]]
+    print("csv rate overlay", csv_applied)
+
 vrows = [
     [
         v["hs"],
@@ -214,8 +235,8 @@ out = {
     "meta": {
         "tariffCount": len(tmap),
         "valuationCount": len(vrows),
-        "source": "Customs duties.pdf + HSC.xlsx",
-        "note": "duty% and insurance% from tariff schedule; min/max are reference customs values",
+        "source": "tariffs_gcc_iq_2026.csv + HSC.xlsx",
+        "note": "duty% and insurance% from tariffs_gcc_iq_2026.csv; prohibited flag kept from the previous schedule; min/max are reference customs values",
     },
     "tariff": tmap,
     "items": vrows,
