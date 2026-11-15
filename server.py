@@ -9,7 +9,7 @@ from urllib.parse import urlparse
 ROOT = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(ROOT, "data", "calculator.db")
 HOST = "127.0.0.1"
-PORT = 8765
+PORT = 18765
 
 
 def connect():
