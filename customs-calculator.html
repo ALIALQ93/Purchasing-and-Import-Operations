@@ -126,6 +126,8 @@ input.num{font-family:"IBM Plex Sans";font-feature-settings:"tnum" 1}
 .btn.danger{background:var(--red-bg);color:var(--red);border:1px solid rgba(192,57,43,.25)}
 .btn.sm{padding:7px 10px;font-size:.8rem}
 .settings{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:12px}
+.fx-save{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px}
+.fx-save .note{margin:0}
 @media (max-width:900px){.settings{grid-template-columns:1fr 1fr}}
 .formula{
   margin-top:12px;padding:11px 13px;border-radius:10px;background:var(--amber-bg);
@@ -264,15 +266,30 @@ table.lines td.col-new{background:#e8f5ef !important}
 }
 .lib[hidden]{display:none !important}
 .lib-card{
-  width:min(560px,100%);max-height:min(82vh,680px);overflow:auto;
+  width:min(760px,100%);max-height:min(82vh,680px);overflow:auto;
   background:#fff;border-radius:16px;padding:18px 20px;
   box-shadow:0 18px 50px rgba(16,48,73,.22);
 }
+.report-card{width:min(1100px,100%);max-height:min(88vh,860px)}
+.lib-tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 4px}
+.pick-count{margin-inline-start:auto;font-size:.8rem;color:var(--ink-soft)}
+.pick{display:flex;align-items:center;justify-content:center}
+.pick input{width:18px;height:18px;accent-color:var(--navy);cursor:pointer}
+.report-table{width:100%;border-collapse:collapse;font-size:.8rem;margin-top:10px}
+.report-table th,.report-table td{padding:8px 6px;border-bottom:1px solid var(--line);text-align:center;vertical-align:middle}
+.report-table th{font-size:.72rem;color:var(--ink-soft);font-weight:600;background:var(--surface-2)}
+.report-table td.name,.report-table th.name{text-align:start}
+.report-table td.num{font-family:"IBM Plex Sans";font-variant-numeric:tabular-nums;font-weight:700}
+.report-table tr.grand td{background:var(--navy);color:#fff;font-weight:700;border:0}
+.report-block{margin-top:18px}
+.report-block h3{margin:0 0 4px;font-size:1rem;color:var(--navy)}
+.report-block .meta{font-size:.78rem;color:var(--ink-soft);margin-bottom:4px}
+#reportView{z-index:90}
 .lib-head{display:flex;justify-content:space-between;align-items:center;gap:10px}
 .lib-head h2{margin:0}
 .save-row{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end;margin:12px 0}
 .save-item{
-  display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;
+  display:grid;grid-template-columns:auto 1fr auto auto;gap:8px;align-items:center;
   padding:10px 0;border-bottom:1px solid var(--line);
 }
 .save-item b{display:block}
@@ -291,6 +308,8 @@ table.lines td.col-new{background:#e8f5ef !important}
   }
   .no-print,.screen-only,.topbar,header.hero{display:none !important}
   .print-sheet{display:block !important}
+  body.printing-report #printSheet{display:none !important}
+  body:not(.printing-report) #reportSheet{display:none !important}
   .print-sheet{font-size:8pt;color:#12283d}
   .doc-banner{
     display:flex;justify-content:space-between;align-items:flex-end;gap:8mm;
@@ -323,7 +342,10 @@ table.lines td.col-new{background:#e8f5ef !important}
   }
   table.doc tbody tr{break-inside:avoid;page-break-inside:avoid}
   table.doc tbody tr:nth-child(even) td{background:#f4f7fa}
-  table.doc td.c-name,.doc-section h2{text-align:right}
+  table.doc td.c-name,table.doc td.name,.doc-section h2{text-align:right}
+  table.doc tfoot tr.grand td{background:#0f3049 !important;color:#fff !important}
+  table.doc td.name .meta{display:block;margin-top:.3mm;color:#5a6b7b;font-size:6.5pt;font-weight:500}
+  table.doc tr.grand td .meta{color:#d5dee8}
   table.doc tfoot td.c-name{text-align:right;padding-inline:2mm}
   table.doc.is-empty tfoot{display:none}
   table.doc td.num{
@@ -372,6 +394,12 @@ table.lines td.col-new{background:#e8f5ef !important}
         <input id="saveName" type="text" maxlength="120" placeholder="مثال: شحنة آذار">
       </label>
       <button type="button" class="btn" id="saveBtn">حفظ</button>
+    </div>
+    <div class="lib-tools">
+      <button type="button" class="btn sm ghost dark" id="pickAll">تحديد الكل</button>
+      <button type="button" class="btn sm ghost dark" id="pickNone">إلغاء التحديد</button>
+      <button type="button" class="btn sm" id="reportBtn">تقرير المحدد</button>
+      <span class="pick-count" id="pickCount">لم يُحدد سجل</span>
     </div>
     <div id="saveList"></div>
     <p class="lib-note" id="libMode">—</p>
@@ -526,6 +554,22 @@ table.lines td.col-new{background:#e8f5ef !important}
   </footer>
 </div>
 
+<div class="lib no-print" id="reportView" hidden>
+  <div class="lib-card report-card">
+    <div class="lib-head">
+      <h2>تقرير السجلات المحددة</h2>
+      <div style="display:flex;gap:8px">
+        <button type="button" class="btn sm print" id="reportPrint">طباعة A4</button>
+        <button type="button" class="btn sm ghost dark" id="reportClose">إغلاق</button>
+      </div>
+    </div>
+    <p class="lib-note" id="reportMeta"></p>
+    <div id="reportScreen"></div>
+  </div>
+</div>
+
+<div class="print-sheet print-only" id="reportSheet"></div>
+
 <header class="hero no-print">
   <div class="wrap">
     <div class="hero-grid">
@@ -596,6 +640,11 @@ table.lines td.col-new{background:#e8f5ef !important}
             <option value="duty">الكمركي فقط</option>
           </select>
         </label>
+      </div>
+      <div class="fx-save">
+        <button type="button" class="btn sm" id="saveFxDefaults">حفظ أسعار الصرف كافتراضية</button>
+        <button type="button" class="btn sm ghost dark" id="restoreFxDefaults">استعادة الافتراضي</button>
+        <span class="note" id="fxDefaultNote"></span>
       </div>
 
       <div class="formula">
@@ -745,6 +794,39 @@ table.lines td.col-new{background:#e8f5ef !important}
   document.getElementById('metaVals').textContent =
     'قيم مرجعية: ' + (data.meta?.valuationCount || catalog.length).toLocaleString('en-US') + ' مادة';
 
+  const FX_DEFAULTS_KEY = 'customs-calculator-fx-defaults';
+
+  function readFxDefaults() {
+    try {
+      const raw = JSON.parse(localStorage.getItem(FX_DEFAULTS_KEY) || '');
+      const fxGoods = num(raw.fxGoods);
+      const fxFees = num(raw.fxFees);
+      if (fxGoods > 0 && fxFees > 0) return { fxGoods: fxGoods, fxFees: fxFees };
+    } catch (err) { /* يبقى السعر المدمج */ }
+    return { fxGoods: 1320, fxFees: 1320 };
+  }
+
+  function fxFallback(kind) {
+    const defaults = readFxDefaults();
+    return defaults[kind] || 1320;
+  }
+
+  function paintFxDefaultNote() {
+    const defaults = readFxDefaults();
+    const note = el('fxDefaultNote');
+    if (note) {
+      note.textContent = 'الافتراضي المحفوظ: مواد ' + defaults.fxGoods.toLocaleString('en-US')
+        + ' · رسوم ' + defaults.fxFees.toLocaleString('en-US');
+    }
+  }
+
+  function applyFxDefaults() {
+    const defaults = readFxDefaults();
+    el('fxGoods').value = String(defaults.fxGoods);
+    el('fxFees').value = String(defaults.fxFees);
+    paintFxDefaultNote();
+  }
+
   const el = (id) => document.getElementById(id);
   const q = el('q');
   const results = el('results');
@@ -883,8 +965,8 @@ table.lines td.col-new{background:#e8f5ef !important}
   function calcLine(line) {
     const qty = line.qty;
     const price = line.price;
-    const fxGoods = num(el('fxGoods').value) || 1320;
-    const fxFees = num(el('fxFees').value) || 1320;
+    const fxGoods = num(el('fxGoods').value) || fxFallback('fxGoods');
+    const fxFees = num(el('fxFees').value) || fxFallback('fxFees');
     const cUnit = num(line.dutyBase);
     const customsValue = cUnit * qty;
     const feesUsd = feeUsd(line, customsValue);
@@ -967,8 +1049,8 @@ table.lines td.col-new{background:#e8f5ef !important}
     const feesIqd = calcs.reduce((s, c) => s + c.feesIqd, 0);
     const expIqd = totalExpensesIqd();
     const invIqd = calcs.reduce((s, c) => s + c.invoiceIqd, 0);
-    const fxGoods = num(el('fxGoods').value) || 1320;
-    const fxFees = num(el('fxFees').value) || 1320;
+    const fxGoods = num(el('fxGoods').value) || fxFallback('fxGoods');
+    const fxFees = num(el('fxFees').value) || fxFallback('fxFees');
     const expUsd = expensesUsd(fxGoods);
     const grandIqd = invIqd + feesIqd + expIqd;
     const grandUsd = invUsd + feesUsd + expUsd;
@@ -1262,7 +1344,7 @@ table.lines td.col-new{background:#e8f5ef !important}
   }
 
   function addExpense(name) {
-    const fx = num(el('fxGoods').value) || 1320;
+    const fx = num(el('fxGoods').value) || fxFallback('fxGoods');
     expenses.push({
       id: eid++,
       name: name || '',
@@ -1291,7 +1373,7 @@ table.lines td.col-new{background:#e8f5ef !important}
         exp.fx = 1;
         if (fxInp) { fxInp.value = '1'; fxInp.disabled = true; }
       } else if (exp.currency === 'USD') {
-          exp.fx = num(el('fxGoods').value) || 1320;
+          exp.fx = num(el('fxGoods').value) || fxFallback('fxGoods');
         if (fxInp) { fxInp.disabled = false; fxInp.value = String(exp.fx); }
       } else {
         exp.fx = 0;
@@ -1352,8 +1434,9 @@ table.lines td.col-new{background:#e8f5ef !important}
   }
 
   function applySnapshot(data) {
-    el('fxGoods').value = data.fxGoods ?? '1320';
-    el('fxFees').value = data.fxFees ?? '1320';
+    const fxDefaults = readFxDefaults();
+    el('fxGoods').value = data.fxGoods ?? String(fxDefaults.fxGoods);
+    el('fxFees').value = data.fxFees ?? String(fxDefaults.fxFees);
     el('reconPct').value = data.reconPct ?? '5';
     el('feeScope').value = data.feeScope || 'all';
     lines.length = 0;
@@ -1460,20 +1543,252 @@ table.lines td.col-new{background:#e8f5ef !important}
     });
   }
 
+  const selectedIds = new Set();
+  let libraryRows = [];
+
+  function scopeLabel(scope) {
+    if (scope === 'duty') return 'الكمركي فقط';
+    if (scope === 'duty_recon') return 'كمركي + إعمار';
+    return 'كمركي + تأمينات + إعمار';
+  }
+
+  function feesFor(line, customsValue, reconPct, scope) {
+    const duty = customsValue * num(line.dutyPct) / 100;
+    const insur = customsValue * num(line.insurPct) / 100;
+    const recon = customsValue * num(reconPct) / 100;
+    if (scope === 'duty') return duty;
+    if (scope === 'duty_recon') return duty + recon;
+    return duty + insur + recon;
+  }
+
+  function summarizePayload(payload) {
+    const data = payload || {};
+    const fxGoods = num(data.fxGoods) || fxFallback('fxGoods');
+    const fxFees = num(data.fxFees) || fxFallback('fxFees');
+    const reconPct = num(data.reconPct);
+    const scope = data.feeScope || 'all';
+    const recLines = Array.isArray(data.lines) ? data.lines : [];
+    const recExp = Array.isArray(data.expenses) ? data.expenses : [];
+    const calcs = recLines.map((line) => {
+      const qty = num(line.qty);
+      const price = num(line.price);
+      const customsValue = num(line.dutyBase) * qty;
+      const feesUsd = feesFor(line, customsValue, reconPct, scope);
+      const invoiceUsd = qty * price;
+      return {
+        line: line,
+        qty: qty,
+        feesUsd: feesUsd,
+        feesIqd: feesUsd * fxFees,
+        invoiceUsd: invoiceUsd,
+        invoiceIqd: invoiceUsd * fxGoods,
+      };
+    });
+    const expIqd = recExp.reduce((s, exp) => s + expenseIqd(exp), 0);
+    const expUsd = recExp.reduce((s, exp) => {
+      if (exp.currency === 'USD') return s + num(exp.amount);
+      const iqd = expenseIqd(exp);
+      return s + (fxGoods > 0 ? iqd / fxGoods : 0);
+    }, 0);
+    const invUsd = calcs.reduce((s, c) => s + c.invoiceUsd, 0);
+    const withLines = calcs.map((c) => {
+      let alloc = 0;
+      if (expIqd && calcs.length) {
+        alloc = invUsd > 0 ? expIqd * (c.invoiceUsd / invUsd) : expIqd / calcs.length;
+      }
+      const totalIqd = c.invoiceIqd + c.feesIqd + alloc;
+      return Object.assign({}, c, {
+        alloc: alloc,
+        newUnit: c.qty > 0 ? totalIqd / c.qty : 0,
+      });
+    });
+    const invIqd = withLines.reduce((s, c) => s + c.invoiceIqd, 0);
+    const feesUsd = withLines.reduce((s, c) => s + c.feesUsd, 0);
+    const feesIqd = withLines.reduce((s, c) => s + c.feesIqd, 0);
+    return {
+      fxGoods: fxGoods,
+      fxFees: fxFees,
+      reconPct: reconPct,
+      scope: scope,
+      count: recLines.length,
+      lines: withLines,
+      expenses: recExp,
+      invUsd: invUsd,
+      invIqd: invIqd,
+      feesUsd: feesUsd,
+      feesIqd: feesIqd,
+      expUsd: expUsd,
+      expIqd: expIqd,
+      grandUsd: invUsd + feesUsd + expUsd,
+      grandIqd: invIqd + feesIqd + expIqd,
+    };
+  }
+
+  function paintPickCount() {
+    const n = selectedIds.size;
+    el('pickCount').textContent = n ? ('المحدد: ' + n) : 'لم يُحدد سجل';
+  }
+
+  function summaryRow(name, when, stats, idx) {
+    return `<tr>
+      <td class="num">${idx}</td>
+      <td class="name">${escapeHtml(name)}<div class="meta">${escapeHtml(when || '')}</div></td>
+      <td class="num">${stats.count}</td>
+      <td class="num">${fmtNum(stats.invUsd)}</td>
+      <td class="num">${fmtInt(stats.invIqd)}</td>
+      <td class="num">${fmtNum(stats.feesUsd)}</td>
+      <td class="num">${fmtInt(stats.feesIqd)}</td>
+      <td class="num">${fmtNum(stats.expUsd)}</td>
+      <td class="num">${fmtInt(stats.expIqd)}</td>
+      <td class="num">${fmtNum(stats.grandUsd)}</td>
+      <td class="num">${fmtInt(stats.grandIqd)}</td>
+    </tr>`;
+  }
+
+  function materialsTable(stats, printMode) {
+    const head = `<thead><tr>
+      <th>#</th><th class="name">المادة</th><th>الكمية</th><th>سعر الوحدة<span class="u">USD</span></th>
+      <th>تعرفة %</th><th>تأمين %</th><th>الرسوم<span class="u">د.ع</span></th>
+      <th>الفاتورة<span class="u">د.ع</span></th><th>سعر الوحدة<span class="u">د.ع</span></th>
+    </tr></thead>`;
+    const body = stats.lines.length
+      ? stats.lines.map((c, i) => {
+          const line = c.line;
+          const name = line.title || line.desc || line.hs || '—';
+          return `<tr>
+            <td class="num">${i + 1}</td>
+            <td class="name">${escapeHtml(name)}<div class="meta">${escapeHtml(line.hs || '')}</div></td>
+            <td class="num">${fmtQty(c.qty)}</td>
+            <td class="num">${fmtNum(line.price)}</td>
+            <td class="num">${fmtPct(line.dutyPct)}</td>
+            <td class="num">${fmtPct(line.insurPct)}</td>
+            <td class="num">${fmtInt(c.feesIqd)}</td>
+            <td class="num">${fmtInt(c.invoiceIqd)}</td>
+            <td class="num">${fmtInt(c.newUnit)}</td>
+          </tr>`;
+        }).join('')
+      : '<tr><td class="doc-empty" colspan="9">لا توجد مواد</td></tr>';
+    const cls = printMode ? 'doc' : 'report-table';
+    return `<table class="${cls}">${head}<tbody>${body}</tbody></table>`;
+  }
+
+  function renderReport(records) {
+    const items = records.map((rec) => ({
+      name: rec.name || 'بدون اسم',
+      when: rec.updated_at || '',
+      stats: summarizePayload(rec.payload),
+    }));
+    const tot = items.reduce((a, it) => {
+      const s = it.stats;
+      a.count += s.count;
+      a.invUsd += s.invUsd;
+      a.invIqd += s.invIqd;
+      a.feesUsd += s.feesUsd;
+      a.feesIqd += s.feesIqd;
+      a.expUsd += s.expUsd;
+      a.expIqd += s.expIqd;
+      a.grandUsd += s.grandUsd;
+      a.grandIqd += s.grandIqd;
+      return a;
+    }, { count: 0, invUsd: 0, invIqd: 0, feesUsd: 0, feesIqd: 0, expUsd: 0, expIqd: 0, grandUsd: 0, grandIqd: 0 });
+    const head = `<thead><tr>
+      <th>#</th><th class="name">السجل</th><th>المواد</th>
+      <th>مواد<span class="u">USD</span></th><th>مواد<span class="u">د.ع</span></th>
+      <th>رسوم<span class="u">USD</span></th><th>رسوم<span class="u">د.ع</span></th>
+      <th>مصاريف<span class="u">USD</span></th><th>مصاريف<span class="u">د.ع</span></th>
+      <th>الإجمالي<span class="u">USD</span></th><th>الإجمالي<span class="u">د.ع</span></th>
+    </tr></thead>`;
+    const body = items.map((it, i) => summaryRow(it.name, it.when, it.stats, i + 1)).join('');
+    const foot = `<tfoot><tr class="grand">
+      <td></td><td class="name">المجموع</td><td class="num">${tot.count}</td>
+      <td class="num">${fmtNum(tot.invUsd)}</td><td class="num">${fmtInt(tot.invIqd)}</td>
+      <td class="num">${fmtNum(tot.feesUsd)}</td><td class="num">${fmtInt(tot.feesIqd)}</td>
+      <td class="num">${fmtNum(tot.expUsd)}</td><td class="num">${fmtInt(tot.expIqd)}</td>
+      <td class="num">${fmtNum(tot.grandUsd)}</td><td class="num">${fmtInt(tot.grandIqd)}</td>
+    </tr></tfoot>`;
+    const blocks = items.map((it) => `<section class="report-block doc-section">
+      <h3>${escapeHtml(it.name)}</h3>
+      <p class="meta">${escapeHtml(it.when)} · ${it.stats.count} مادة · صرف المواد ${it.stats.fxGoods.toLocaleString('en-US')} · صرف الرسوم ${it.stats.fxFees.toLocaleString('en-US')} · ${escapeHtml(scopeLabel(it.stats.scope))}</p>
+      ${materialsTable(it.stats, false)}
+    </section>`).join('');
+    const printBlocks = items.map((it) => `<section class="doc-section">
+      <h2>${escapeHtml(it.name)}</h2>
+      <p class="stat-note">${escapeHtml(it.when)} · ${it.stats.count} مادة · صرف المواد ${it.stats.fxGoods.toLocaleString('en-US')} · صرف الرسوم ${it.stats.fxFees.toLocaleString('en-US')} · ${escapeHtml(scopeLabel(it.stats.scope))}</p>
+      ${materialsTable(it.stats, true)}
+    </section>`).join('');
+    const now = new Date().toLocaleString('ar-IQ', {
+      year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
+    });
+    el('reportMeta').textContent = now + ' · ' + items.length + ' سجل · إجمالي الدولار هو مجموع دولار كل سجل، لأن سعر الصرف قد يختلف بين السجلات.';
+    el('reportScreen').innerHTML = `<table class="report-table">${head}<tbody>${body}</tbody>${foot}</table>${blocks}`;
+    el('reportSheet').innerHTML = `
+      <header class="doc-banner">
+        <div>
+          <p class="doc-kicker">عمليات الشراء والاستيراد</p>
+          <h1>تقرير السجلات المحددة</h1>
+          <p class="doc-sub">${escapeHtml(now)} · ${items.length} سجل</p>
+        </div>
+      </header>
+      <div class="doc-section">
+        <h2>ملخص السجلات</h2>
+        <table class="doc">${head}<tbody>${body}</tbody>${foot}</table>
+        <p class="stat-note">إجمالي الدولار هو مجموع دولار كل سجل. سعر الصرف قد يختلف من سجل إلى آخر.</p>
+      </div>
+      ${printBlocks}
+      <footer class="doc-foot">
+        <span>مستند تقديري — لا يُعد بديلاً عن البيان الكمركي الرسمي</span>
+        <span>A4 أفقي</span>
+      </footer>`;
+  }
+
+  async function openReport() {
+    const ids = libraryRows.map((r) => String(r.id)).filter((id) => selectedIds.has(id));
+    if (!ids.length) {
+      el('libMode').textContent = 'حدد سجلًا واحدًا على الأقل للتقرير.';
+      return;
+    }
+    el('libMode').textContent = 'جارٍ إعداد التقرير...';
+    try {
+      const records = [];
+      for (const id of ids) {
+        const rec = await readRecord(id);
+        if (rec) records.push(rec);
+      }
+      if (!records.length) {
+        el('libMode').textContent = 'تعذّر قراءة السجلات المحددة.';
+        return;
+      }
+      renderReport(records);
+      el('reportView').hidden = false;
+      el('libMode').textContent = useServer
+        ? 'الحفظ في قاعدة البيانات المحلية: data\\calculator.db'
+        : 'الحفظ داخل هذا المتصفح. لملف قاعدة بيانات على الجهاز، شغّل «تشغيل الحاسبة».';
+    } catch (err) {
+      el('libMode').textContent = 'تعذّر إعداد التقرير.';
+    }
+  }
+
   async function refreshLibrary() {
     const box = el('saveList');
     let rows = [];
     try {
       rows = await listRecords();
     } catch (err) {
+      libraryRows = [];
       box.innerHTML = '<div class="lib-empty">تعذّر قراءة السجلات</div>';
+      paintPickCount();
       return;
     }
+    libraryRows = rows;
+    const alive = new Set(rows.map((r) => String(r.id)));
+    Array.from(selectedIds).forEach((id) => { if (!alive.has(id)) selectedIds.delete(id); });
+    paintPickCount();
     if (!rows.length) {
       box.innerHTML = '<div class="lib-empty">لا توجد سجلات محفوظة بعد</div>';
       return;
     }
     box.innerHTML = rows.map((r) => `<div class="save-item">
+      <label class="pick"><input type="checkbox" data-pick="${r.id}" ${selectedIds.has(String(r.id)) ? 'checked' : ''} aria-label="تحديد ${escapeHtml(r.name)}"></label>
       <div><b>${escapeHtml(r.name)}</b><div class="meta">${escapeHtml(r.updated_at || '')}</div></div>
       <button type="button" class="btn sm ghost dark" data-load="${r.id}">فتح</button>
       <button type="button" class="btn sm danger" data-drop="${r.id}">حذف</button>
@@ -1491,6 +1806,33 @@ table.lines td.col-new{background:#e8f5ef !important}
 
   el('openLib').addEventListener('click', () => { openLibrary(); });
   el('libClose').addEventListener('click', () => { el('library').hidden = true; });
+  el('pickAll').addEventListener('click', () => {
+    libraryRows.forEach((r) => selectedIds.add(String(r.id)));
+    refreshLibrary();
+  });
+  el('pickNone').addEventListener('click', () => {
+    selectedIds.clear();
+    refreshLibrary();
+  });
+  el('reportBtn').addEventListener('click', () => { openReport(); });
+  el('reportClose').addEventListener('click', () => { el('reportView').hidden = true; });
+  el('reportView').addEventListener('click', (e) => {
+    if (e.target === el('reportView')) el('reportView').hidden = true;
+  });
+  el('reportPrint').addEventListener('click', () => {
+    document.body.classList.add('printing-report');
+    window.print();
+  });
+  window.addEventListener('afterprint', () => {
+    document.body.classList.remove('printing-report');
+  });
+  el('saveList').addEventListener('change', (e) => {
+    const id = e.target.getAttribute('data-pick');
+    if (!id) return;
+    if (e.target.checked) selectedIds.add(id);
+    else selectedIds.delete(id);
+    paintPickCount();
+  });
   el('library').addEventListener('click', (e) => {
     if (e.target === el('library')) el('library').hidden = true;
   });
@@ -1525,6 +1867,7 @@ table.lines td.col-new{background:#e8f5ef !important}
       } else if (dropId) {
         if (!window.confirm('حذف هذا السجل؟')) return;
         await removeRecord(dropId);
+        selectedIds.delete(String(dropId));
         if (String(currentId) === String(dropId)) { currentId = null; currentName = ''; }
         await refreshLibrary();
       }
@@ -1533,7 +1876,25 @@ table.lines td.col-new{background:#e8f5ef !important}
     }
   });
 
+  el('saveFxDefaults').addEventListener('click', () => {
+    const fxGoods = num(el('fxGoods').value);
+    const fxFees = num(el('fxFees').value);
+    if (!(fxGoods > 0) || !(fxFees > 0)) {
+      el('fxDefaultNote').textContent = 'أدخل سعر صرف المواد وسعر صرف الرسوم قبل الحفظ.';
+      if (!(fxGoods > 0)) el('fxGoods').focus();
+      else el('fxFees').focus();
+      return;
+    }
+    localStorage.setItem(FX_DEFAULTS_KEY, JSON.stringify({ fxGoods: fxGoods, fxFees: fxFees }));
+    paintFxDefaultNote();
+  });
+  el('restoreFxDefaults').addEventListener('click', () => {
+    applyFxDefaults();
+    refreshComputed();
+  });
+
   detectStore().then((ok) => { useServer = ok; });
+  applyFxDefaults();
   renderExpenses(false);
   render();
 })();
