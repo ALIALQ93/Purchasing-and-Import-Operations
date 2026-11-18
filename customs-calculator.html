@@ -85,6 +85,9 @@ main{padding:18px 0 48px;display:grid;gap:14px}
 .card-head{
   display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:8px;
 }
+.line-search{min-width:min(280px,100%);margin:0}
+.line-search input{min-width:220px}
+#lineFilterEmpty{margin:8px 0 0}
 label.field{display:block}
 label.field > span{display:block;font-size:.78rem;font-weight:600;margin-bottom:5px;color:var(--ink-soft)}
 input,select{
@@ -125,7 +128,7 @@ input.num{font-family:"IBM Plex Sans";font-feature-settings:"tnum" 1}
 .btn.print:hover{background:#9a7224}
 .btn.danger{background:var(--red-bg);color:var(--red);border:1px solid rgba(192,57,43,.25)}
 .btn.sm{padding:7px 10px;font-size:.8rem}
-.settings{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:12px}
+.settings{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-top:12px}
 .fx-save{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px}
 .fx-save .note{margin:0}
 @media (max-width:900px){.settings{grid-template-columns:1fr 1fr}}
@@ -295,7 +298,18 @@ table.lines td.col-new{background:#e8f5ef !important}
   display:grid;grid-template-columns:minmax(150px,.8fr) minmax(240px,1.6fr) auto;
   gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line);
 }
-.bulk-row select{width:100%;font:inherit;border:1px solid var(--line);border-radius:8px;padding:7px 8px;background:#fff}
+.bulk-pick{position:relative;min-width:0}
+.bulk-pick input{width:100%;font:inherit;border:1px solid var(--line);border-radius:8px;padding:7px 8px;background:#fff}
+.bulk-suggest{
+  position:absolute;z-index:6;inset-inline:0;top:calc(100% + 4px);max-height:220px;overflow:auto;
+  background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);
+}
+.bulk-suggest[hidden]{display:none !important}
+.bulk-suggest button{
+  display:block;width:100%;text-align:start;border:0;border-bottom:1px solid var(--line);
+  background:#fff;padding:8px 10px;font:inherit;cursor:pointer;color:inherit;
+}
+.bulk-suggest button:hover{background:var(--brass-bg)}
 .bulk-row .meta{font-size:.75rem;color:var(--ink-soft)}
 .bulk-ok{color:#1c855a;font-weight:700;font-size:.78rem}
 .bulk-choose{color:#9a6c10;font-weight:700;font-size:.78rem}
@@ -432,7 +446,7 @@ table.lines td.col-new{background:#e8f5ef !important}
   </header>
   <table class="doc meta">
     <colgroup>
-      <col style="width:22%"><col style="width:10%"><col style="width:16%"><col style="width:16%"><col style="width:12%"><col style="width:24%">
+      <col style="width:18%"><col style="width:9%"><col style="width:14%"><col style="width:14%"><col style="width:10%"><col style="width:11%"><col style="width:24%">
     </colgroup>
     <thead>
       <tr>
@@ -441,6 +455,7 @@ table.lines td.col-new{background:#e8f5ef !important}
         <th>صرف المواد<span class="u">د.ع / $</span></th>
         <th>صرف الرسوم<span class="u">د.ع / $</span></th>
         <th>إعمار %</th>
+        <th>ذوي الشهداء %</th>
         <th>نطاق الرسوم</th>
       </tr>
     </thead>
@@ -451,6 +466,7 @@ table.lines td.col-new{background:#e8f5ef !important}
         <td class="num" id="printFx">1,320</td>
         <td class="num" id="printFxFees">1,320</td>
         <td class="num" id="printRecon">5</td>
+        <td class="num" id="printMartyrs">0.5</td>
         <td id="printScope">—</td>
       </tr>
     </tbody>
@@ -678,6 +694,10 @@ table.lines td.col-new{background:#e8f5ef !important}
           <input id="reconPct" class="num" type="number" min="0" max="100" step="any" value="5">
         </label>
         <label class="field">
+          <span>دعم ذوي الشهداء %</span>
+          <input id="martyrsPct" class="num" type="number" min="0" max="100" step="any" value="0.5">
+        </label>
+        <label class="field">
           <span>ما يشمله «الرسوم»</span>
           <select id="feeScope">
             <option value="all">كمركي + تأمينات + إعمار</option>
@@ -695,7 +715,7 @@ table.lines td.col-new{background:#e8f5ef !important}
       <div class="formula">
         <strong>سعر الوحدة الجديد (د.ع)</strong> =
         (قيمة الفاتورة بالدولار × صرف المواد + الرسوم بالدولار × صرف الرسوم + حصة المصاريف) ÷ الكمية
-        <div style="margin-top:4px">أساس الرسم تكتبه أنت لكل مادة (دولار للوحدة). الرسوم = أساس الرسم × الكمية × النسب. المصاريف تُوزَّع بنسبة قيمة الفاتورة.</div>
+        <div style="margin-top:4px">أساس الرسم تكتبه أنت لكل مادة (دولار للوحدة). الرسوم = أساس الرسم × الكمية × النسب، ويُضاف إليها 0.5% دعم ذوي الشهداء على كل البنود. المصاريف تُوزَّع بنسبة قيمة الفاتورة.</div>
       </div>
     </section>
 
@@ -743,6 +763,10 @@ table.lines td.col-new{background:#e8f5ef !important}
         <h2>2) قائمة المواد</h2>
         <p class="sub" id="lineCount">لا توجد مواد بعد.</p>
       </div>
+      <label class="field line-search no-print">
+        <span>بحث في القائمة</span>
+        <input id="lineSearch" type="search" placeholder="رمز HS أو وصف أو TSC" autocomplete="off">
+      </label>
       <div class="legend-limits no-print">
         <span><i class="legend-swatch lim"></i> الحدود الرسمية</span>
         <span><i class="legend-swatch res"></i> نتائج الاحتساب</span>
@@ -776,6 +800,7 @@ table.lines td.col-new{background:#e8f5ef !important}
           <tr><td colspan="15" class="empty">أضف مادة من البحث أعلاه</td></tr>
         </tbody>
       </table>
+      <p class="empty" id="lineFilterEmpty" hidden>لا توجد مواد مطابقة للبحث</p>
     </div>
   </section>
 
@@ -1001,10 +1026,12 @@ table.lines td.col-new{background:#e8f5ef !important}
     const duty = customsValue * line.dutyPct / 100;
     const insur = customsValue * line.insurPct / 100;
     const recon = customsValue * num(el('reconPct').value) / 100;
+    const martyrs = customsValue * num(el('martyrsPct').value) / 100;
     const scope = el('feeScope').value;
-    if (scope === 'duty') return duty;
-    if (scope === 'duty_recon') return duty + recon;
-    return duty + insur + recon;
+    let fees = duty + insur + recon;
+    if (scope === 'duty') fees = duty;
+    else if (scope === 'duty_recon') fees = duty + recon;
+    return fees + martyrs;
   }
 
   function calcLine(line) {
@@ -1193,39 +1220,98 @@ table.lines td.col-new{background:#e8f5ef !important}
     });
   }
 
+  function bulkSuggestions(row, query) {
+    const q = String(query || '').trim();
+    if (!q) return row.options.slice(0, 12);
+    const digits = q.replace(/\D/g, '');
+    const found = search(q);
+    const extra = [];
+    if (digits.length === 8 && tariff[digits] && !(itemsByHs.get(digits) || []).length) extra.push(tariffOnlyItem(digits));
+    const merged = [];
+    const seen = new Set();
+    found.concat(extra).concat(row.options).forEach((it) => {
+      const key = it.hs + '|' + (it.title || '') + '|' + (it.tsc || '') + '|' + String(it.min);
+      if (seen.has(key)) return;
+      seen.add(key);
+      merged.push(it);
+    });
+    return merged.slice(0, 12);
+  }
+
+  function refreshBulkCounts() {
+    const ready = bulkRows.filter((row) => row.picked).length;
+    el('bulkAdd').disabled = ready === 0;
+    el('bulkAdd').textContent = ready ? ('إضافة المطابق (' + ready + ')') : 'إضافة المطابق';
+    const waiting = bulkRows.length - ready;
+    el('bulkNote').textContent = ready + ' سطر جاهز للإضافة'
+      + (waiting ? (' · ' + waiting + ' سطر بانتظار اختيار الرمز') : '');
+  }
+
+  function bulkStatus(row) {
+    if (row.picked) {
+      const same = row.digits.length >= 8 && row.picked.hs === row.digits.slice(0, 8);
+      return same ? { cls: 'bulk-ok', label: 'مطابق' } : { cls: 'bulk-choose', label: 'تم الاختيار' };
+    }
+    if (row.kind === 'variants') return { cls: 'bulk-choose', label: 'عدة أوصاف' };
+    if (row.kind === 'prefix') return { cls: 'bulk-choose', label: 'اختر من نفس البداية' };
+    if (row.kind === 'near') return { cls: 'bulk-choose', label: 'اختر أقرب رمز' };
+    return { cls: 'bulk-bad', label: 'ابحث عن الرمز' };
+  }
+
+  function showBulkSuggest(index, query) {
+    const row = bulkRows[index];
+    if (!row) return;
+    document.querySelectorAll('.bulk-suggest').forEach((box) => {
+      if (box.getAttribute('data-bulk-suggest') !== String(index)) box.hidden = true;
+    });
+    const box = el('bulkReview').querySelector('[data-bulk-suggest="' + index + '"]');
+    const list = bulkSuggestions(row, query);
+    row.suggests = list;
+    if (!list.length) { box.hidden = true; box.innerHTML = ''; return; }
+    box.hidden = false;
+    box.innerHTML = list.map((it, idx) =>
+      `<button type="button" data-bulk-item="${index}" data-suggest="${idx}">${escapeHtml(itemChoiceLabel(it))}</button>`
+    ).join('');
+  }
+
+  function pickBulkItem(index, it) {
+    const row = bulkRows[index];
+    if (!row || !it) return;
+    row.picked = it;
+    const input = el('bulkReview').querySelector('[data-bulk-q="' + index + '"]');
+    const status = el('bulkReview').querySelector('[data-bulk-status="' + index + '"]');
+    if (input) input.value = itemChoiceLabel(it);
+    const st = bulkStatus(row);
+    if (status) { status.className = st.cls; status.textContent = st.label; }
+    const box = el('bulkReview').querySelector('[data-bulk-suggest="' + index + '"]');
+    if (box) box.hidden = true;
+    refreshBulkCounts();
+  }
+
   function renderBulkReview() {
     const box = el('bulkReview');
     if (!bulkRows.length) {
       box.innerHTML = '';
       el('bulkAdd').disabled = true;
+      el('bulkAdd').textContent = 'إضافة المطابق';
       return;
     }
-    const ready = bulkRows.filter((row) => row.choice >= 0).length;
     box.innerHTML = bulkRows.map((row, i) => {
-      const cls = row.kind === 'exact' ? 'bulk-ok' : (row.kind === 'none' ? 'bulk-bad' : 'bulk-choose');
-      const label = row.kind === 'exact' ? 'مطابق'
-        : row.kind === 'variants' ? 'عدة أوصاف'
-        : row.kind === 'prefix' ? 'اختر من نفس البداية'
-        : row.kind === 'near' ? 'اختر أقرب رمز'
-        : 'لا يوجد رمز قريب';
-      const options = row.options.map((it, idx) =>
-        `<option value="${idx}"${idx === row.choice ? ' selected' : ''}>${escapeHtml(itemChoiceLabel(it))}</option>`
-      ).join('');
-      const placeholder = row.choice < 0 ? '<option value="-1" selected>اختر الرمز</option>' : '<option value="-1">اختر الرمز</option>';
+      const st = bulkStatus(row);
+      const value = row.picked ? itemChoiceLabel(row.picked) : '';
       return `<div class="bulk-row">
         <div>
           <b class="en">${escapeHtml(row.raw || row.digits || '—')}</b>
           <div class="meta">كمية ${fmtQty(row.qty)} · مبلغ ${fmtNum(row.amount)}</div>
         </div>
-        <select data-bulk-pick="${i}">${placeholder}${options}</select>
-        <span class="${cls}">${label}</span>
+        <div class="bulk-pick">
+          <input type="search" data-bulk-q="${i}" value="${escapeHtml(value)}" placeholder="ابحث بالرمز أو الوصف" autocomplete="off">
+          <div class="bulk-suggest" data-bulk-suggest="${i}" hidden></div>
+        </div>
+        <span class="${st.cls}" data-bulk-status="${i}">${st.label}</span>
       </div>`;
     }).join('');
-    el('bulkAdd').disabled = ready === 0;
-    el('bulkAdd').textContent = ready ? ('إضافة المطابق (' + ready + ')') : 'إضافة المطابق';
-    const pending = bulkRows.length - ready;
-    el('bulkNote').textContent = ready + ' سطر جاهز للإضافة'
-      + (pending ? (' · ' + pending + ' سطر بانتظار اختيار الرمز') : '');
+    refreshBulkCounts();
   }
 
   function matchBulk() {
@@ -1239,7 +1325,7 @@ table.lines td.col-new{background:#e8f5ef !important}
     }
     bulkRows = parsed.map((row) => {
       const found = matchDigits(row.digits);
-      const choice = (found.kind === 'exact' || found.kind === 'variants') && found.options.length ? 0 : -1;
+      const picked = (found.kind === 'exact' || found.kind === 'variants') && found.options.length ? found.options[0] : null;
       return {
         raw: row.raw,
         digits: row.digits,
@@ -1247,7 +1333,8 @@ table.lines td.col-new{background:#e8f5ef !important}
         amount: row.amount,
         kind: found.kind,
         options: found.options,
-        choice: choice,
+        picked: picked,
+        suggests: found.options,
       };
     });
     renderBulkReview();
@@ -1257,8 +1344,7 @@ table.lines td.col-new{background:#e8f5ef !important}
     const asTotal = el('bulkAmountMode').value === 'total';
     let added = 0;
     bulkRows.forEach((row) => {
-      if (row.choice < 0) return;
-      const it = row.options[row.choice];
+      const it = row.picked;
       if (!it) return;
       const qty = row.qty > 0 ? row.qty : 1;
       let price = row.amount;
@@ -1362,6 +1448,7 @@ table.lines td.col-new{background:#e8f5ef !important}
     el('printFx').textContent = fxGoods.toLocaleString('en-US');
     el('printFxFees').textContent = fxFees.toLocaleString('en-US');
     el('printRecon').textContent = el('reconPct').value;
+    el('printMartyrs').textContent = el('martyrsPct').value;
     el('printScope').textContent = el('feeScope').selectedOptions[0]?.text || '—';
   }
 
@@ -1412,10 +1499,39 @@ table.lines td.col-new{background:#e8f5ef !important}
     });
   }
 
+  function lineMatches(line, query) {
+    const nq = norm(query);
+    if (!nq) return true;
+    const digits = nq.replace(/\D/g, '');
+    if (digits && String(line.hs || '').includes(digits)) return true;
+    const blob = norm([line.hs, line.tsc, line.title, line.desc, line.unit].join(' '));
+    return blob.includes(nq);
+  }
+
+  function applyLineFilter() {
+    const query = el('lineSearch') ? el('lineSearch').value : '';
+    const rows = el('tbody').querySelectorAll('tr[data-id]');
+    let shown = 0;
+    rows.forEach((tr) => {
+      const line = lines.find((item) => item.id === +tr.dataset.id);
+      const ok = !line || lineMatches(line, query);
+      tr.hidden = !ok;
+      if (ok) shown += 1;
+    });
+    const note = el('lineFilterEmpty');
+    if (note) note.hidden = !lines.length || !String(query).trim() || shown > 0;
+    if (!lines.length) return;
+    el('lineCount').textContent = String(query).trim()
+      ? (shown + ' من ' + lines.length + ' مادة')
+      : (lines.length + ' مادة — عدّل الكمية والسعر وأساس الرسم في الجدول');
+  }
+
   function refreshComputed() {
     const calcs = withAlloc(lines.map(calcLine));
-    el('tbody').querySelectorAll('tr[data-id]').forEach((tr, i) => {
-      if (calcs[i]) patchRow(tr, calcs[i], lines[i]);
+    const byId = new Map(lines.map((line, i) => [String(line.id), { line: line, calc: calcs[i] }]));
+    el('tbody').querySelectorAll('tr[data-id]').forEach((tr) => {
+      const hit = byId.get(tr.dataset.id);
+      if (hit) patchRow(tr, hit.calc, hit.line);
     });
     paintExpenseTotals();
     updateSummary(calcs);
@@ -1429,6 +1545,7 @@ table.lines td.col-new{background:#e8f5ef !important}
     const tbody = el('tbody');
     if (!lines.length) {
       tbody.innerHTML = '<tr><td colspan="15" class="empty">أضف مادة من البحث أعلاه</td></tr>';
+      if (el('lineFilterEmpty')) el('lineFilterEmpty').hidden = true;
       updateSummary([]);
       return;
     }
@@ -1491,6 +1608,7 @@ table.lines td.col-new{background:#e8f5ef !important}
     });
 
     updateSummary(calcs);
+    applyLineFilter();
   }
 
   function preparePrint() {
@@ -1500,6 +1618,8 @@ table.lines td.col-new{background:#e8f5ef !important}
     });
     refreshComputed();
   }
+
+  el('lineSearch').addEventListener('input', applyLineFilter);
 
   q.addEventListener('input', () => {
     clearTimeout(searchTimer);
@@ -1512,6 +1632,9 @@ table.lines td.col-new{background:#e8f5ef !important}
   });
   document.addEventListener('click', (e) => {
     if (!results.contains(e.target) && e.target !== q) results.classList.remove('open');
+    if (!e.target.closest('.bulk-pick')) {
+      document.querySelectorAll('.bulk-suggest').forEach((box) => { box.hidden = true; });
+    }
   });
   q.addEventListener('keydown', (e) => {
     if (e.key !== 'Enter') return;
@@ -1535,16 +1658,35 @@ table.lines td.col-new{background:#e8f5ef !important}
   });
   el('bulkMatch').addEventListener('click', matchBulk);
   el('bulkAdd').addEventListener('click', commitBulk);
-  el('bulkReview').addEventListener('change', (e) => {
-    const idx = e.target.getAttribute('data-bulk-pick');
+  el('bulkReview').addEventListener('input', (e) => {
+    const idx = e.target.getAttribute('data-bulk-q');
     if (idx == null || !bulkRows[idx]) return;
-    bulkRows[idx].choice = parseInt(e.target.value, 10);
-    const ready = bulkRows.filter((row) => row.choice >= 0).length;
-    el('bulkAdd').disabled = ready === 0;
-    el('bulkAdd').textContent = ready ? ('إضافة المطابق (' + ready + ')') : 'إضافة المطابق';
-    const pendingChoice = bulkRows.length - ready;
-    el('bulkNote').textContent = ready + ' سطر جاهز للإضافة'
-      + (pendingChoice ? (' · ' + pendingChoice + ' سطر بانتظار اختيار الرمز') : '');
+    bulkRows[idx].picked = null;
+    const status = el('bulkReview').querySelector('[data-bulk-status="' + idx + '"]');
+    const st = bulkStatus(bulkRows[idx]);
+    if (status) { status.className = st.cls; status.textContent = st.label; }
+    showBulkSuggest(+idx, e.target.value);
+    refreshBulkCounts();
+  });
+  el('bulkReview').addEventListener('focusin', (e) => {
+    const idx = e.target.getAttribute('data-bulk-q');
+    if (idx == null) return;
+    showBulkSuggest(+idx, bulkRows[idx].picked ? '' : e.target.value);
+  });
+  el('bulkReview').addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter' || !e.target.getAttribute('data-bulk-q')) return;
+    e.preventDefault();
+    const idx = +e.target.getAttribute('data-bulk-q');
+    const row = bulkRows[idx];
+    if (row && row.suggests && row.suggests.length) pickBulkItem(idx, row.suggests[0]);
+  });
+  el('bulkReview').addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-bulk-item]');
+    if (!btn) return;
+    const idx = +btn.getAttribute('data-bulk-item');
+    const row = bulkRows[idx];
+    const it = row && row.suggests ? row.suggests[+btn.getAttribute('data-suggest')] : null;
+    pickBulkItem(idx, it);
   });
 
   function renderExpenses(focusLast) {
@@ -1664,7 +1806,7 @@ table.lines td.col-new{background:#e8f5ef !important}
   });
   window.addEventListener('beforeprint', preparePrint);
 
-  ['fxGoods', 'fxFees', 'reconPct', 'feeScope'].forEach((id) => {
+  ['fxGoods', 'fxFees', 'reconPct', 'martyrsPct', 'feeScope'].forEach((id) => {
     el(id).addEventListener('input', refreshComputed);
     el(id).addEventListener('change', refreshComputed);
   });
@@ -1678,6 +1820,7 @@ table.lines td.col-new{background:#e8f5ef !important}
       fxGoods: el('fxGoods').value,
       fxFees: el('fxFees').value,
       reconPct: el('reconPct').value,
+      martyrsPct: el('martyrsPct').value,
       feeScope: el('feeScope').value,
       lines: lines.map((l) => Object.assign({}, l)),
       expenses: expenses.map((e) => Object.assign({}, e)),
@@ -1689,6 +1832,7 @@ table.lines td.col-new{background:#e8f5ef !important}
     el('fxGoods').value = data.fxGoods ?? String(fxDefaults.fxGoods);
     el('fxFees').value = data.fxFees ?? String(fxDefaults.fxFees);
     el('reconPct').value = data.reconPct ?? '5';
+    el('martyrsPct').value = data.martyrsPct ?? '0.5';
     el('feeScope').value = data.feeScope || 'all';
     lines.length = 0;
     (data.lines || []).forEach((l) => lines.push(l));
@@ -1803,13 +1947,15 @@ table.lines td.col-new{background:#e8f5ef !important}
     return 'كمركي + تأمينات + إعمار';
   }
 
-  function feesFor(line, customsValue, reconPct, scope) {
+  function feesFor(line, customsValue, reconPct, scope, martyrsPct) {
     const duty = customsValue * num(line.dutyPct) / 100;
     const insur = customsValue * num(line.insurPct) / 100;
     const recon = customsValue * num(reconPct) / 100;
-    if (scope === 'duty') return duty;
-    if (scope === 'duty_recon') return duty + recon;
-    return duty + insur + recon;
+    const martyrs = customsValue * num(martyrsPct) / 100;
+    let fees = duty + insur + recon;
+    if (scope === 'duty') fees = duty;
+    else if (scope === 'duty_recon') fees = duty + recon;
+    return fees + martyrs;
   }
 
   function summarizePayload(payload) {
@@ -1817,6 +1963,7 @@ table.lines td.col-new{background:#e8f5ef !important}
     const fxGoods = num(data.fxGoods) || fxFallback('fxGoods');
     const fxFees = num(data.fxFees) || fxFallback('fxFees');
     const reconPct = num(data.reconPct);
+    const martyrsPct = data.martyrsPct == null ? 0.5 : num(data.martyrsPct);
     const scope = data.feeScope || 'all';
     const recLines = Array.isArray(data.lines) ? data.lines : [];
     const recExp = Array.isArray(data.expenses) ? data.expenses : [];
@@ -1824,7 +1971,7 @@ table.lines td.col-new{background:#e8f5ef !important}
       const qty = num(line.qty);
       const price = num(line.price);
       const customsValue = num(line.dutyBase) * qty;
-      const feesUsd = feesFor(line, customsValue, reconPct, scope);
+      const feesUsd = feesFor(line, customsValue, reconPct, scope, martyrsPct);
       const invoiceUsd = qty * price;
       return {
         line: line,
@@ -1860,6 +2007,7 @@ table.lines td.col-new{background:#e8f5ef !important}
       fxGoods: fxGoods,
       fxFees: fxFees,
       reconPct: reconPct,
+      martyrsPct: martyrsPct,
       scope: scope,
       count: recLines.length,
       lines: withLines,
@@ -1959,12 +2107,12 @@ table.lines td.col-new{background:#e8f5ef !important}
     </tr></tfoot>`;
     const blocks = items.map((it) => `<section class="report-block doc-section">
       <h3>${escapeHtml(it.name)}</h3>
-      <p class="meta">${escapeHtml(it.when)} · ${it.stats.count} مادة · صرف المواد ${it.stats.fxGoods.toLocaleString('en-US')} · صرف الرسوم ${it.stats.fxFees.toLocaleString('en-US')} · ${escapeHtml(scopeLabel(it.stats.scope))}</p>
+      <p class="meta">${escapeHtml(it.when)} · ${it.stats.count} مادة · صرف المواد ${it.stats.fxGoods.toLocaleString('en-US')} · صرف الرسوم ${it.stats.fxFees.toLocaleString('en-US')} · ${escapeHtml(scopeLabel(it.stats.scope))} · ذوي الشهداء ${fmtPct(it.stats.martyrsPct)}%</p>
       ${materialsTable(it.stats, false)}
     </section>`).join('');
     const printBlocks = items.map((it) => `<section class="doc-section">
       <h2>${escapeHtml(it.name)}</h2>
-      <p class="stat-note">${escapeHtml(it.when)} · ${it.stats.count} مادة · صرف المواد ${it.stats.fxGoods.toLocaleString('en-US')} · صرف الرسوم ${it.stats.fxFees.toLocaleString('en-US')} · ${escapeHtml(scopeLabel(it.stats.scope))}</p>
+      <p class="stat-note">${escapeHtml(it.when)} · ${it.stats.count} مادة · صرف المواد ${it.stats.fxGoods.toLocaleString('en-US')} · صرف الرسوم ${it.stats.fxFees.toLocaleString('en-US')} · ${escapeHtml(scopeLabel(it.stats.scope))} · ذوي الشهداء ${fmtPct(it.stats.martyrsPct)}%</p>
       ${materialsTable(it.stats, true)}
     </section>`).join('');
     const now = new Date().toLocaleString('ar-IQ', {
