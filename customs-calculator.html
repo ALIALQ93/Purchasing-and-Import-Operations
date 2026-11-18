@@ -285,6 +285,21 @@ table.lines td.col-new{background:#e8f5ef !important}
 .report-block h3{margin:0 0 4px;font-size:1rem;color:var(--navy)}
 .report-block .meta{font-size:.78rem;color:var(--ink-soft);margin-bottom:4px}
 #reportView{z-index:90}
+#bulkView{z-index:92}
+#bulkText{
+  width:100%;min-height:150px;margin-top:8px;resize:vertical;
+  border:1px solid var(--line);border-radius:12px;padding:10px 12px;
+  font-family:"IBM Plex Sans",sans-serif;font-size:.9rem;direction:ltr;text-align:left;
+}
+.bulk-row{
+  display:grid;grid-template-columns:minmax(150px,.8fr) minmax(240px,1.6fr) auto;
+  gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line);
+}
+.bulk-row select{width:100%;font:inherit;border:1px solid var(--line);border-radius:8px;padding:7px 8px;background:#fff}
+.bulk-row .meta{font-size:.75rem;color:var(--ink-soft)}
+.bulk-ok{color:#1c855a;font-weight:700;font-size:.78rem}
+.bulk-choose{color:#9a6c10;font-weight:700;font-size:.78rem}
+.bulk-bad{color:#8e2a20;font-weight:700;font-size:.78rem}
 .lib-head{display:flex;justify-content:space-between;align-items:center;gap:10px}
 .lib-head h2{margin:0}
 .save-row{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end;margin:12px 0}
@@ -570,6 +585,32 @@ table.lines td.col-new{background:#e8f5ef !important}
 
 <div class="print-sheet print-only" id="reportSheet"></div>
 
+<div class="lib no-print" id="bulkView" hidden>
+  <div class="lib-card report-card">
+    <div class="lib-head">
+      <h2>إضافة متعددة</h2>
+      <button type="button" class="btn sm ghost dark" id="bulkClose">إغلاق</button>
+    </div>
+    <p class="sub">سطر لكل مادة: رمز HS، ثم الكمية، ثم المبلغ. يمكن اللصق مباشرة من إكسل.</p>
+    <textarea id="bulkText" placeholder="85447000&#9;10&#9;25.5&#10;85076000&#9;2&#9;100"></textarea>
+    <div class="fx-save">
+      <label class="field">
+        <span>المبلغ يعني</span>
+        <select id="bulkAmountMode">
+          <option value="unit">سعر الوحدة بالدولار</option>
+          <option value="total">إجمالي السطر بالدولار</option>
+        </select>
+      </label>
+      <button type="button" class="btn sm" id="bulkMatch">مطابقة الرموز</button>
+    </div>
+    <p class="lib-note" id="bulkNote">الصق القائمة ثم اضغط مطابقة الرموز.</p>
+    <div id="bulkReview"></div>
+    <div class="fx-save">
+      <button type="button" class="btn sm" id="bulkAdd" disabled>إضافة المطابق</button>
+    </div>
+  </div>
+</div>
+
 <header class="hero no-print">
   <div class="wrap">
     <div class="hero-grid">
@@ -617,6 +658,10 @@ table.lines td.col-new{background:#e8f5ef !important}
           <input id="defaultPrice" class="num" type="number" min="0" step="any" placeholder="من الحد الأدنى">
         </label>
         <button type="button" class="btn" id="addBtn" disabled>إضافة</button>
+      </div>
+      <div class="fx-save">
+        <button type="button" class="btn sm" id="openBulk">إضافة متعددة</button>
+        <span class="note">للعدد الكبير: الصق رمز HS والكمية والمبلغ، ثم اختر أقرب رمز إذا لم يتطابق الكود.</span>
       </div>
 
       <div class="settings">
@@ -1024,7 +1069,7 @@ table.lines td.col-new{background:#e8f5ef !important}
     });
   }
 
-  function addLine(it, qty, price) {
+  function pushLine(it, qty, price) {
     const rate = rateFor(it.hs);
     lines.push({
       id: uid++,
@@ -1036,11 +1081,198 @@ table.lines td.col-new{background:#e8f5ef !important}
       prohibited: rate.prohibited,
       rateFound: rate.found,
     });
+  }
+
+  function addLine(it, qty, price) {
+    pushLine(it, qty, price);
     pending = null;
     addBtn.disabled = true;
     q.value = '';
     el('defaultPrice').value = '';
     render();
+  }
+
+  let itemsByHs = null;
+  let knownHs = null;
+  let bulkRows = [];
+
+  function ensureHsIndex() {
+    if (itemsByHs) return;
+    itemsByHs = new Map();
+    for (let i = 0; i < catalog.length; i++) {
+      const it = rowObj(catalog[i]);
+      let list = itemsByHs.get(it.hs);
+      if (!list) itemsByHs.set(it.hs, list = []);
+      list.push(it);
+    }
+    knownHs = Array.from(new Set([...itemsByHs.keys(), ...Object.keys(tariff)]));
+  }
+
+  function tariffOnlyItem(hs) {
+    return { hs: hs, tsc: '', desc: '', title: '', min: null, max: null, unit: '', model: '', origin: '' };
+  }
+
+  function itemChoiceLabel(it) {
+    const rate = rateFor(it.hs);
+    const name = it.title || it.desc || (rate.found ? 'تعرفة فقط' : 'بدون وصف');
+    const duty = rate.found ? (rate.duty + '%') : 'بدون تعرفة';
+    const limit = it.min != null ? (' · حد ' + fmtLimit(it.min) + '–' + fmtLimit(it.max)) : '';
+    const ban = rate.prohibited ? ' · محظور' : '';
+    return it.hs + ' — ' + name + ' — ' + duty + limit + ban;
+  }
+
+  function nearestCodes(digits, limit) {
+    const probe = (digits + '00000000').slice(0, 8);
+    const probeNum = Number(probe);
+    const scored = [];
+    for (let i = 0; i < knownHs.length; i++) {
+      const hs = knownHs[i];
+      let prefix = 0;
+      const n = Math.min(hs.length, digits.length);
+      while (prefix < n && hs[prefix] === digits[prefix]) prefix++;
+      if (prefix < 4) continue;
+      scored.push({ hs: hs, prefix: prefix, dist: Math.abs(Number(hs) - probeNum) });
+    }
+    scored.sort((a, b) => (b.prefix - a.prefix) || (a.dist - b.dist));
+    const out = [];
+    const seen = new Set();
+    for (let i = 0; i < scored.length && out.length < limit; i++) {
+      if (seen.has(scored[i].hs)) continue;
+      seen.add(scored[i].hs);
+      out.push(scored[i].hs);
+    }
+    return out;
+  }
+
+  function optionsFromCodes(codes) {
+    const options = [];
+    for (let i = 0; i < codes.length && options.length < 12; i++) {
+      const items = itemsByHs.get(codes[i]);
+      if (items && items.length) options.push(...items.slice(0, 3));
+      else if (tariff[codes[i]]) options.push(tariffOnlyItem(codes[i]));
+    }
+    return options.slice(0, 12);
+  }
+
+  function matchDigits(digits) {
+    if (!digits || digits.length < 4) return { kind: 'none', options: [] };
+    if (digits.length >= 8) {
+      const exact = digits.slice(0, 8);
+      const items = itemsByHs.get(exact);
+      if (items && items.length) return { kind: items.length === 1 ? 'exact' : 'variants', options: items };
+      if (tariff[exact]) return { kind: 'exact', options: [tariffOnlyItem(exact)] };
+    } else {
+      const prefixCodes = [];
+      for (let i = 0; i < knownHs.length && prefixCodes.length < 12; i++) {
+        if (knownHs[i].startsWith(digits)) prefixCodes.push(knownHs[i]);
+      }
+      if (prefixCodes.length) return { kind: 'prefix', options: optionsFromCodes(prefixCodes) };
+    }
+    const near = optionsFromCodes(nearestCodes(digits, 8));
+    return { kind: near.length ? 'near' : 'none', options: near };
+  }
+
+  function parseAmount(raw) {
+    let s = String(raw ?? '').trim().replace(/\s/g, '');
+    if (/^\d{1,3}(,\d{3})+(\.\d+)?$/.test(s)) s = s.replace(/,/g, '');
+    else if (/^\d+,\d+$/.test(s)) s = s.replace(',', '.');
+    return num(s);
+  }
+
+  function parseBulk(text) {
+    return String(text || '').split(/\r?\n/).map((line) => line.trim()).filter(Boolean).map((line) => {
+      let bits = line.split(/[\t,;|]+/).map((s) => s.trim()).filter(Boolean);
+      if (bits.length < 3) bits = line.split(/\s+/).filter(Boolean);
+      const digits = String(bits[0] || '').replace(/\D/g, '');
+      return {
+        raw: bits[0] || '',
+        digits: digits,
+        qty: num(bits[1]),
+        amount: parseAmount(bits[2]),
+      };
+    });
+  }
+
+  function renderBulkReview() {
+    const box = el('bulkReview');
+    if (!bulkRows.length) {
+      box.innerHTML = '';
+      el('bulkAdd').disabled = true;
+      return;
+    }
+    const ready = bulkRows.filter((row) => row.choice >= 0).length;
+    box.innerHTML = bulkRows.map((row, i) => {
+      const cls = row.kind === 'exact' ? 'bulk-ok' : (row.kind === 'none' ? 'bulk-bad' : 'bulk-choose');
+      const label = row.kind === 'exact' ? 'مطابق'
+        : row.kind === 'variants' ? 'عدة أوصاف'
+        : row.kind === 'prefix' ? 'اختر من نفس البداية'
+        : row.kind === 'near' ? 'اختر أقرب رمز'
+        : 'لا يوجد رمز قريب';
+      const options = row.options.map((it, idx) =>
+        `<option value="${idx}"${idx === row.choice ? ' selected' : ''}>${escapeHtml(itemChoiceLabel(it))}</option>`
+      ).join('');
+      const placeholder = row.choice < 0 ? '<option value="-1" selected>اختر الرمز</option>' : '<option value="-1">اختر الرمز</option>';
+      return `<div class="bulk-row">
+        <div>
+          <b class="en">${escapeHtml(row.raw || row.digits || '—')}</b>
+          <div class="meta">كمية ${fmtQty(row.qty)} · مبلغ ${fmtNum(row.amount)}</div>
+        </div>
+        <select data-bulk-pick="${i}">${placeholder}${options}</select>
+        <span class="${cls}">${label}</span>
+      </div>`;
+    }).join('');
+    el('bulkAdd').disabled = ready === 0;
+    el('bulkAdd').textContent = ready ? ('إضافة المطابق (' + ready + ')') : 'إضافة المطابق';
+    const pending = bulkRows.length - ready;
+    el('bulkNote').textContent = ready + ' سطر جاهز للإضافة'
+      + (pending ? (' · ' + pending + ' سطر بانتظار اختيار الرمز') : '');
+  }
+
+  function matchBulk() {
+    ensureHsIndex();
+    const parsed = parseBulk(el('bulkText').value);
+    if (!parsed.length) {
+      bulkRows = [];
+      el('bulkNote').textContent = 'الصق سطرًا واحدًا على الأقل: رمز HS والكمية والمبلغ.';
+      renderBulkReview();
+      return;
+    }
+    bulkRows = parsed.map((row) => {
+      const found = matchDigits(row.digits);
+      const choice = (found.kind === 'exact' || found.kind === 'variants') && found.options.length ? 0 : -1;
+      return {
+        raw: row.raw,
+        digits: row.digits,
+        qty: row.qty,
+        amount: row.amount,
+        kind: found.kind,
+        options: found.options,
+        choice: choice,
+      };
+    });
+    renderBulkReview();
+  }
+
+  function commitBulk() {
+    const asTotal = el('bulkAmountMode').value === 'total';
+    let added = 0;
+    bulkRows.forEach((row) => {
+      if (row.choice < 0) return;
+      const it = row.options[row.choice];
+      if (!it) return;
+      const qty = row.qty > 0 ? row.qty : 1;
+      let price = row.amount;
+      if (asTotal) price = qty > 0 ? row.amount / qty : row.amount;
+      pushLine(it, qty, price);
+      added++;
+    });
+    if (!added) return;
+    render();
+    el('bulkView').hidden = true;
+    el('bulkText').value = '';
+    bulkRows = [];
+    renderBulkReview();
+    el('bulkNote').textContent = 'أُضيفت ' + added + ' مادة إلى القائمة.';
   }
 
   function updateSummary(calcs) {
@@ -1294,6 +1526,25 @@ table.lines td.col-new{background:#e8f5ef !important}
     let price = num(el('defaultPrice').value);
     if (!price && pending.min != null) price = pending.min;
     addLine(pending, qty, price);
+  });
+
+  el('openBulk').addEventListener('click', () => { el('bulkView').hidden = false; });
+  el('bulkClose').addEventListener('click', () => { el('bulkView').hidden = true; });
+  el('bulkView').addEventListener('click', (e) => {
+    if (e.target === el('bulkView')) el('bulkView').hidden = true;
+  });
+  el('bulkMatch').addEventListener('click', matchBulk);
+  el('bulkAdd').addEventListener('click', commitBulk);
+  el('bulkReview').addEventListener('change', (e) => {
+    const idx = e.target.getAttribute('data-bulk-pick');
+    if (idx == null || !bulkRows[idx]) return;
+    bulkRows[idx].choice = parseInt(e.target.value, 10);
+    const ready = bulkRows.filter((row) => row.choice >= 0).length;
+    el('bulkAdd').disabled = ready === 0;
+    el('bulkAdd').textContent = ready ? ('إضافة المطابق (' + ready + ')') : 'إضافة المطابق';
+    const pendingChoice = bulkRows.length - ready;
+    el('bulkNote').textContent = ready + ' سطر جاهز للإضافة'
+      + (pendingChoice ? (' · ' + pendingChoice + ' سطر بانتظار اختيار الرمز') : '');
   });
 
   function renderExpenses(focusLast) {
