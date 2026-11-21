@@ -41,7 +41,8 @@ body{
 }
 .topbar .brand{font-weight:700;font-size:.95rem}
 .topbar .brand small{display:block;font-weight:400;opacity:.7;font-size:.75rem;margin-top:1px}
-.top-actions{display:flex;gap:8px;flex-wrap:wrap}
+.top-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.store-status{font-size:.75rem;opacity:.85;max-width:14rem;line-height:1.35}
 
 header.hero{
   background:linear-gradient(158deg,var(--navy),var(--navy-2));
@@ -404,6 +405,7 @@ table.lines td.col-new{background:#e8f5ef !important}
       <small>عرض كامل · طباعة A4 أفقية</small>
     </div>
     <div class="top-actions">
+      <span class="store-status" id="storeStatus"></span>
       <button type="button" class="btn ghost" id="openLib">السجلات</button>
       <button type="button" class="btn ghost" id="clearAll">تفريغ القائمة</button>
       <button type="button" class="btn print" id="printBtn">طباعة A4</button>
@@ -1814,6 +1816,8 @@ table.lines td.col-new{background:#e8f5ef !important}
   let currentId = null;
   let currentName = '';
   let useServer = false;
+  let apiBase = '';
+  const LOCAL_API = 'http://127.0.0.1:18765';
 
   function snapshot() {
     return {
@@ -1858,19 +1862,57 @@ table.lines td.col-new{background:#e8f5ef !important}
     });
   }
 
+  function apiUrl(path) {
+    return apiBase + path;
+  }
+
+  async function probeApi(base) {
+    const res = await fetch(base + '/api/health', { cache: 'no-store' });
+    return res.ok;
+  }
+
   async function detectStore() {
+    apiBase = '';
     if (location.protocol === 'file:') return false;
+    const host = location.hostname;
+    const alreadyLocalApp = (host === '127.0.0.1' || host === 'localhost') && location.port === '18765';
     try {
-      const res = await fetch('/api/health', { cache: 'no-store' });
-      return res.ok;
-    } catch (err) {
-      return false;
+      if (await probeApi('')) return true;
+    } catch (err) {}
+    if (!alreadyLocalApp) {
+      try {
+        if (await probeApi(LOCAL_API)) {
+          apiBase = LOCAL_API;
+          return true;
+        }
+      } catch (err) {}
     }
+    return false;
+  }
+
+  function storeNote() {
+    if (useServer) {
+      return 'الحفظ في قاعدة البيانات المحلية: data\\calculator.db. أبقِ نافذة «تشغيل الحاسبة» مفتوحة.';
+    }
+    if (location.protocol !== 'file:' && location.hostname !== '127.0.0.1' && location.hostname !== 'localhost') {
+      return 'الحفظ داخل هذا المتصفح. للحفظ في القاعدة المحلية شغّل «تشغيل الحاسبة» على هذا الجهاز، وافق على الاتصال المحلي إن طلب المتصفح، ثم حدّث الصفحة.';
+    }
+    return 'الحفظ داخل هذا المتصفح. لملف قاعدة بيانات على الجهاز، شغّل «تشغيل الحاسبة».';
+  }
+
+  function paintStoreStatus() {
+    const node = el('storeStatus');
+    if (!node) return;
+    if (useServer && apiBase) node.textContent = 'القاعدة المحلية متصلة';
+    else if (useServer) node.textContent = 'القاعدة المحلية';
+    else if (location.protocol !== 'file:' && location.hostname !== '127.0.0.1' && location.hostname !== 'localhost') {
+      node.textContent = 'الحفظ في المتصفح حتى تشغيل الحاسبة';
+    } else node.textContent = '';
   }
 
   async function listRecords() {
     if (useServer) {
-      const res = await fetch('/api/records', { cache: 'no-store' });
+      const res = await fetch(apiUrl('/api/records'), { cache: 'no-store' });
       if (!res.ok) throw new Error('list');
       return res.json();
     }
@@ -1888,7 +1930,7 @@ table.lines td.col-new{background:#e8f5ef !important}
 
   async function readRecord(id) {
     if (useServer) {
-      const res = await fetch('/api/records/' + id, { cache: 'no-store' });
+      const res = await fetch(apiUrl('/api/records/' + id), { cache: 'no-store' });
       if (!res.ok) throw new Error('read');
       return res.json();
     }
@@ -1903,7 +1945,7 @@ table.lines td.col-new{background:#e8f5ef !important}
   async function writeRecord(name) {
     const body = { id: currentId, name: name, payload: snapshot() };
     if (useServer) {
-      const res = await fetch('/api/records', {
+      const res = await fetch(apiUrl('/api/records'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
@@ -1926,7 +1968,7 @@ table.lines td.col-new{background:#e8f5ef !important}
 
   async function removeRecord(id) {
     if (useServer) {
-      const res = await fetch('/api/records/' + id, { method: 'DELETE' });
+      const res = await fetch(apiUrl('/api/records/' + id), { method: 'DELETE' });
       if (!res.ok) throw new Error('delete');
       return;
     }
@@ -2159,9 +2201,7 @@ table.lines td.col-new{background:#e8f5ef !important}
       }
       renderReport(records);
       el('reportView').hidden = false;
-      el('libMode').textContent = useServer
-        ? 'الحفظ في قاعدة البيانات المحلية: data\\calculator.db'
-        : 'الحفظ داخل هذا المتصفح. لملف قاعدة بيانات على الجهاز، شغّل «تشغيل الحاسبة».';
+      el('libMode').textContent = storeNote();
     } catch (err) {
       el('libMode').textContent = 'تعذّر إعداد التقرير.';
     }
@@ -2197,9 +2237,7 @@ table.lines td.col-new{background:#e8f5ef !important}
   async function openLibrary() {
     el('library').hidden = false;
     el('saveName').value = currentName || '';
-    el('libMode').textContent = useServer
-      ? 'الحفظ في قاعدة البيانات المحلية: data\\calculator.db'
-      : 'الحفظ داخل هذا المتصفح. لملف قاعدة بيانات على الجهاز، شغّل «تشغيل الحاسبة».';
+    el('libMode').textContent = storeNote();
     await refreshLibrary();
   }
 
@@ -2292,7 +2330,7 @@ table.lines td.col-new{background:#e8f5ef !important}
     refreshComputed();
   });
 
-  detectStore().then((ok) => { useServer = ok; });
+  detectStore().then((ok) => { useServer = ok; paintStoreStatus(); });
   applyFxDefaults();
   renderExpenses(false);
   render();

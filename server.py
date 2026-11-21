@@ -10,6 +10,15 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(ROOT, "data", "calculator.db")
 HOST = "127.0.0.1"
 PORT = 18765
+PAGES_ORIGIN = "https://alialq93.github.io"
+
+
+def origin_allowed(origin):
+    if not origin:
+        return False
+    if origin == PAGES_ORIGIN:
+        return True
+    return origin.startswith("http://127.0.0.1:") or origin.startswith("http://localhost:")
 
 
 def connect():
@@ -105,9 +114,30 @@ class AppHandler(SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=ROOT, **kwargs)
 
+    def _cors(self):
+        origin = self.headers.get("Origin")
+        if not origin_allowed(origin):
+            return
+        self.send_header("Access-Control-Allow-Origin", origin)
+        self.send_header("Vary", "Origin")
+        self.send_header("Access-Control-Allow-Private-Network", "true")
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS")
+        requested = self.headers.get("Access-Control-Request-Headers")
+        self.send_header("Access-Control-Allow-Headers", requested or "Content-Type")
+        self.send_header("Access-Control-Max-Age", "600")
+
     def end_headers(self):
         self.send_header("Cache-Control", "no-store")
+        self._cors()
         super().end_headers()
+
+    def do_OPTIONS(self):
+        path = urlparse(self.path).path.rstrip("/") or "/"
+        if path.startswith("/api/") and origin_allowed(self.headers.get("Origin")):
+            self.send_response(204)
+            self.end_headers()
+            return
+        self.send_error(403, "origin")
 
     def _json(self, data, status=200):
         raw = json.dumps(data, ensure_ascii=False).encode("utf-8")
@@ -167,7 +197,7 @@ class AppHandler(SimpleHTTPRequestHandler):
         return self._json({"ok": True})
 
     def log_message(self, fmt, *args):
-        if str(args[0]).startswith("GET /api") or str(args[0]).startswith("POST /api") or str(args[0]).startswith("DELETE /api"):
+        if str(args[0]).startswith(("GET /api", "POST /api", "DELETE /api", "OPTIONS /api")):
             super().log_message(fmt, *args)
 
 
